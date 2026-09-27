@@ -8,7 +8,7 @@ const VENUES = [
   { task: 4, title: 'Object Scanner', code: 'VENUE_04', hint: 'Behind the sports equipment rack.' },
   { task: 5, title: 'Word Game', code: 'VENUE_05', hint: 'In the main hallway, near the vending machines.' },
   { task: 6, title: 'Convince Me', code: 'VENUE_06', hint: 'At the administrative office door.' },
-  { task: 7, title: 'Captcha', code: 'VENUE_07', hint: 'By the front gate security cabin.' },
+  { task: 7, title: 'Dictionary Game', code: 'VENUE_07', hint: 'By the front gate security cabin.' },
   { task: 8, title: 'Morse Code', code: 'VENUE_08', hint: 'Inside the IT laboratory.' },
   { task: 9, title: 'Solar Panel Counter', code: 'VENUE_09', hint: 'On the roof terrace.' },
   { task: 10, title: 'Mystery Final Task', code: 'VENUE_10', hint: 'The final location will be revealed... basement.' }

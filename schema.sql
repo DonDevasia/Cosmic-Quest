@@ -88,16 +88,16 @@ INSERT INTO event_state (is_active) VALUES (false);
 
 -- Insert 10 tasks
 INSERT INTO tasks (task_number, title, description, base_points, status, completion_keyword) VALUES 
-(1, 'Akinator Game', 'Think of a character and let Akinator guess it', 100, 'Locked', NULL),
+(1, 'Akinator Game', 'Think of a character and let Akinator guess it', 100, 'Locked', 'GENIE'),
 (2, 'QR Scanner', 'Scan and decode the hidden QR codes', 100, 'Locked', 'THE_ARCHITECT'),
 (3, 'Thugwar', 'Compete in the Thugwar challenge', 100, 'Locked', 'THUG123'),
 (4, 'Object Scanner', 'Identify the correct objects', 100, 'Locked', NULL),
 (5, 'Word Game', 'Solve the linguistic puzzles', 150, 'Locked', 'BIBLE'),
 (6, 'Convince Me', 'Convince your virtual ex-gf to patch up with you', 150, 'Locked', 'PATCHED_UP'),
-(7, 'Captcha', 'Bypass the human verification system', 200, 'Locked', NULL),
+(7, 'Dictionary Game', 'Identify the correct term from the dictionary definition', 200, 'Locked', 'DAEMON'),
 (8, 'Morse Code', 'Decode the intercepted transmissions', 200, 'Locked', 'GROUND'),
-(9, 'Bottle Counting', 'Analyze the image and count the bottles', 100, 'Locked', NULL),
-(10, 'TANGRAM', 'Solve the Tangram puzzle', 100, 'Locked', NULL);
+(9, 'Bottle Counting', 'Analyze the image and count the bottles', 100, 'Locked', '42'),
+(10, 'TANGRAM', 'Solve the Tangram puzzle', 100, 'Locked', 'SHAPES');
 
 -- Enable Supabase Realtime for these tables
 alter publication supabase_realtime add table teams;

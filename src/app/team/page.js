@@ -7,7 +7,7 @@ import WordleTask from '@/components/WordleTask';
 import ConvinceMeTask from '@/components/ConvinceMeTask';
 import QRScannerTask from '@/components/QRScannerTask';
 import ObjectScannerTask from '@/components/ObjectScannerTask';
-import CaptchaTask from '@/components/CaptchaTask';
+import DictionaryTask from '@/components/DictionaryTask';
 
 
 function TeamDashboardContent() {
@@ -266,6 +266,12 @@ function TeamDashboardContent() {
                     <h3 style={{ color: 'var(--accent-blue)', marginBottom: '10px' }}>UPLOADING TO MAINFRAME...</h3>
                     <p style={{ color: 'var(--text-secondary)' }}>Awaiting manual verification from the Administrator.</p>
                   </div>
+                ) : currentTask.status === 'Completed' ? (
+                  <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-green)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div className="animate-pulse" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px solid var(--accent-green)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite', margin: '0 auto 20px auto' }}></div>
+                    <h3 style={{ color: 'var(--accent-green)', marginBottom: '10px' }}>TASK ACCOMPLISHED</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>Good job! Please wait for the timer to expire to receive your next mission.</p>
+                  </div>
                 ) : (
                   <>
                     {/* Rejection Feedback */}
@@ -378,9 +384,9 @@ function TeamDashboardContent() {
                       />
                     )}
 
-                    {/* Captcha UI */}
-                    {currentTask.title === 'Captcha' && (
-                      <CaptchaTask onSuccess={submitKeywordToAPI} />
+                    {/* Dictionary UI */}
+                    {currentTask.title === 'Dictionary Game' && (
+                      <DictionaryTask onSuccess={submitKeywordToAPI} />
                     )}
 
                     {/* Bottle Counting UI */}
@@ -420,6 +426,61 @@ function TeamDashboardContent() {
                           {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
                           <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px' }}>
                             VERIFY COMPLETION
+                          </button>
+                        </form>
+                      </div>
+                    )}
+
+                    {/* Phase 2 QR Tasks */}
+                    {(currentTask.title === 'Phase 2 - QR 1' || currentTask.title === 'Phase 2 - QR 2' || currentTask.title === 'Phase 2 - QR 3') && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-blue)', borderRadius: '8px' }}>
+                        <h3 className="neon-text-blue" style={{ marginBottom: '15px', textTransform: 'uppercase' }}>{currentTask.title}</h3>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Find the QR code at the given location. You can scan it or enter the code manually.</p>
+                        
+                        <div style={{ width: '100%', marginBottom: '20px' }}>
+                          <QRScannerTask onSuccess={submitKeywordToAPI} />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', margin: '15px 0' }}>
+                          <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
+                          <span style={{ color: 'var(--text-secondary)' }}>OR</span>
+                          <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
+                        </div>
+
+                        <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', width: '100%' }}>
+                          <input 
+                            type="text" 
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value.toUpperCase())}
+                            placeholder="ENTER CODE MANUALLY..." 
+                            style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--accent-blue)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
+                          />
+                          {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
+                          <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px' }}>
+                            VERIFY CODE
+                          </button>
+                        </form>
+                      </div>
+                    )}
+
+                    {/* Phase 2 Final Destination */}
+                    {currentTask.title === 'Phase 2 - Final Destination' && (
+                      <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-purple)', borderRadius: '8px', textAlign: 'center' }}>
+                        <h3 className="neon-text-purple" style={{ marginBottom: '15px' }}>FINAL DESTINATION</h3>
+                        <p style={{ color: 'white', fontSize: '1.2rem', marginBottom: '20px' }}>
+                          Head to the final location! The first team to arrive and enter the final keyword wins!
+                        </p>
+                        <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                          <input 
+                            type="text" 
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value.toUpperCase())}
+                            placeholder="FINAL KEYWORD..." 
+                            style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.8)', border: '2px solid var(--accent-purple)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
+                          />
+                          {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
+                          <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
+                            CLAIM VICTORY
                           </button>
                         </form>
                       </div>

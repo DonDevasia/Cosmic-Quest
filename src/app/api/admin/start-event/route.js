@@ -25,7 +25,7 @@ export async function POST() {
     }
 
     // 2. Fetch all tasks
-    const { data: tasks, error: taskErr } = await supabase.from('tasks').select('id');
+    const { data: tasks, error: taskErr } = await supabase.from('tasks').select('id').lte('task_number', 10);
     if (taskErr) throw taskErr;
 
     // 3. Optional: Clear existing active tasks if starting a fresh round

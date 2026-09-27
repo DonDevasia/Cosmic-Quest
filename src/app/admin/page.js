@@ -401,16 +401,20 @@ export default function AdminDashboard() {
                 <h3 className="neon-text-blue" style={{ marginBottom: '20px' }}>Task Masterlist</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
                   {[
-                    { id: 1, title: 'Treasure Hunt', points: 100, status: 'Locked' },
+                    { id: 1, title: 'Akinator Game', points: 100, status: 'Locked' },
                     { id: 2, title: 'QR Scanner', points: 100, status: 'Locked' },
                     { id: 3, title: 'Thugwar', points: 100, status: 'Locked' },
                     { id: 4, title: 'Object Scanner', points: 100, status: 'Locked' },
                     { id: 5, title: 'Wordle', points: 150, status: 'Locked' },
                     { id: 6, title: 'Convince Me', points: 150, status: 'Locked' },
-                    { id: 7, title: 'Captcha', points: 200, status: 'Locked' },
+                    { id: 7, title: 'Dictionary Game', points: 200, status: 'Locked' },
                     { id: 8, title: 'Morse Code', points: 200, status: 'Locked' },
-                    { id: 9, title: 'Solar Panel Counter', points: 300, status: 'Locked' },
-                    { id: 10, title: 'Mystery Final Task', points: 500, status: 'Locked' }
+                    { id: 9, title: 'Bottle Counting', points: 100, status: 'Locked' },
+                    { id: 10, title: 'TANGRAM', points: 100, status: 'Locked' },
+                    { id: 11, title: 'Phase 2 - QR 1', points: 200, status: 'Locked' },
+                    { id: 12, title: 'Phase 2 - QR 2', points: 200, status: 'Locked' },
+                    { id: 13, title: 'Phase 2 - QR 3', points: 200, status: 'Locked' },
+                    { id: 14, title: 'Phase 2 - Final Destination', points: 500, status: 'Locked' }
                   ].map(task => (
                     <div key={task.id} style={{ padding: '15px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--glass-border)', borderRadius: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
