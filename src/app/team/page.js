@@ -270,7 +270,7 @@ function TeamDashboardContent() {
                   <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-green)', borderRadius: '8px', textAlign: 'center' }}>
                     <div className="animate-pulse" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px solid var(--accent-green)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite', margin: '0 auto 20px auto' }}></div>
                     <h3 style={{ color: 'var(--accent-green)', marginBottom: '10px' }}>WAITING FOR NEXT TASK</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Task Accomplished! Please wait for the timer to expire to receive your next mission.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>Good job! You completed the task before time. Please wait for the timer to expire to receive your next mission.</p>
                   </div>
                 ) : (
                   <>
