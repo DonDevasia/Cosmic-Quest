@@ -18,7 +18,8 @@ function TeamDashboardContent() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [taskTimeLeft, setTaskTimeLeft] = useState(720); // 12 mins in seconds
+  const [masterTimeLeft, setMasterTimeLeft] = useState(480); // 8 mins max
+  const [puzzleTimeLeft, setPuzzleTimeLeft] = useState(null);
   const [keyword, setKeyword] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
@@ -86,16 +87,26 @@ function TeamDashboardContent() {
         admin_feedback: assignment.admin_feedback,
         time_limit_seconds: assignment.tasks.time_limit_seconds || 480
       };
+      // We assume a temporary default puzzle time of 180s (3 minutes) until later configured in DB
+      taskData.puzzle_time_seconds = assignment.tasks.puzzle_time_seconds || 180;
       setCurrentTask(taskData);
       
-      // Calculate remaining time based on started_at
+      // Calculate remaining time
+      let masterRemaining = 0;
+      let puzzleRemaining = null;
+
+      if (assignment.assigned_at) {
+        const elapsed = Math.floor((Date.now() - new Date(assignment.assigned_at).getTime()) / 1000);
+        masterRemaining = Math.max(0, taskData.time_limit_seconds - elapsed);
+      }
+      
       if (assignment.started_at) {
         const elapsed = Math.floor((Date.now() - new Date(assignment.started_at).getTime()) / 1000);
-        const remaining = Math.max(0, taskData.time_limit_seconds - elapsed);
-        setTaskTimeLeft(remaining);
-      } else {
-        setTaskTimeLeft(taskData.time_limit_seconds);
+        puzzleRemaining = Math.max(0, taskData.puzzle_time_seconds - elapsed);
       }
+      
+      setMasterTimeLeft(masterRemaining);
+      setPuzzleTimeLeft(puzzleRemaining);
     }
   };
 
@@ -122,20 +133,32 @@ function TeamDashboardContent() {
   // Task Countdown Timer and Expiration
   useEffect(() => {
     let timerId;
-    if (currentTask?.started_at && taskTimeLeft > 0) {
+    if (currentTask && masterTimeLeft > 0) {
       timerId = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - new Date(currentTask.started_at).getTime()) / 1000);
-        const remaining = Math.max(0, currentTask.time_limit_seconds - elapsed);
-        setTaskTimeLeft(remaining);
+        let newMaster = 0;
+        let newPuzzle = null;
+        
+        if (currentTask.assigned_at) {
+          const masterElapsed = Math.floor((Date.now() - new Date(currentTask.assigned_at).getTime()) / 1000);
+          newMaster = Math.max(0, currentTask.time_limit_seconds - masterElapsed);
+        }
+        
+        if (currentTask.started_at) {
+          const puzzleElapsed = Math.floor((Date.now() - new Date(currentTask.started_at).getTime()) / 1000);
+          newPuzzle = Math.max(0, currentTask.puzzle_time_seconds - puzzleElapsed);
+        }
 
-        if (remaining <= 0) {
+        setMasterTimeLeft(newMaster);
+        setPuzzleTimeLeft(newPuzzle);
+
+        if (newMaster <= 0 || (newPuzzle !== null && newPuzzle <= 0)) {
           clearInterval(timerId);
           handleTaskExpired();
         }
       }, 1000);
     }
     return () => clearInterval(timerId);
-  }, [currentTask, taskTimeLeft]);
+  }, [currentTask, masterTimeLeft, puzzleTimeLeft]);
 
   const handleTaskExpired = async () => {
     try {
@@ -237,11 +260,30 @@ function TeamDashboardContent() {
               <>
                 <h2 className="neon-text-blue" style={{ fontSize: '2.5rem', marginBottom: '20px' }}>{currentTask.title}</h2>
                 
-                {/* Timer is always active and visible */}
-                <div className="neon-text-purple" style={{ fontSize: '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: taskTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
-                  {formatTime(taskTimeLeft)}
+                {/* Timers */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
+                  {/* Master Timer */}
+                  <div>
+                    <div className="neon-text-purple" style={{ fontSize: currentTask.started_at ? '2.5rem' : '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: masterTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
+                      {formatTime(masterTimeLeft)}
+                    </div>
+                    <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
+                      MISSION TIME LIMIT
+                    </p>
+                  </div>
+
+                  {/* Puzzle Timer */}
+                  {currentTask.started_at && puzzleTimeLeft !== null && (
+                    <div>
+                      <div className="neon-text-blue" style={{ fontSize: '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: puzzleTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
+                        {formatTime(puzzleTimeLeft)}
+                      </div>
+                      <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
+                        PUZZLE TIME LIMIT
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px' }}>Time Remaining for Task</p>
 
                 {currentTask.status === 'Assigned' ? (
                   <div style={{ padding: '20px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-purple)', borderRadius: '8px' }}>
