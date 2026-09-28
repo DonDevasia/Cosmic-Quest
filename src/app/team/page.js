@@ -168,7 +168,8 @@ function TeamDashboardContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ teamId: team.id, taskId: currentTask.id, isExpired: true, keyword: '' })
       });
-      // Supabase realtime will trigger fetchTeamData
+      setShowExpiredMessage(false);
+      fetchTeamData();
     } catch (err) {
       console.error('Failed to report expiration');
     }
@@ -186,6 +187,8 @@ function TeamDashboardContent() {
       const data = await res.json();
       if (!data.success) {
         setSubmitError(data.message || 'Invalid Venue QR Code');
+      } else {
+        fetchTeamData();
       }
     } catch (err) {
       setSubmitError('System Error: Connection Failed');
@@ -214,8 +217,7 @@ function TeamDashboardContent() {
       
       if (data.success) {
         setKeyword('');
-        // We do not need to manually change state here because Supabase Realtime 
-        // will automatically detect the DB change and trigger fetchTeamData()!
+        fetchTeamData();
       } else {
         setSubmitError(data.message || 'Access Denied: Invalid Keyword');
       }
