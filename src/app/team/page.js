@@ -151,7 +151,10 @@ function TeamDashboardContent() {
         setMasterTimeLeft(newMaster);
         setPuzzleTimeLeft(newPuzzle);
 
-        if (newMaster <= 0 || (newPuzzle !== null && newPuzzle <= 0)) {
+        const isTaskFinished = currentTask.status === 'Completed' || currentTask.status === 'Submitted';
+        const puzzleExpired = !isTaskFinished && newPuzzle !== null && newPuzzle <= 0;
+
+        if (newMaster <= 0 || puzzleExpired) {
           clearInterval(timerId);
           handleTaskExpired();
         }
