@@ -6,15 +6,21 @@ export default function QRScannerTask({ onSuccess }) {
   const [isScanning, setIsScanning] = useState(false);
 
   const handleScan = (result) => {
-    if (result && result.length > 0) {
-      // result is an array of detected codes in the latest version of the library
-      // usually we just take the first one
-      const code = result[0].rawValue || result[0];
-      if (code) {
-        setIsScanning(false);
-        // Automatically submit the scanned keyword
-        onSuccess(code);
-      }
+    if (!result) return;
+    
+    let code = '';
+    if (Array.isArray(result) && result.length > 0) {
+      code = result[0].rawValue || result[0].text || (typeof result[0] === 'string' ? result[0] : '');
+    } else if (typeof result === 'object' && !Array.isArray(result)) {
+      code = result.rawValue || result.text || result.data || '';
+    } else if (typeof result === 'string') {
+      code = result;
+    }
+
+    if (code && typeof code === 'string') {
+      setIsScanning(false);
+      // Automatically submit the scanned keyword
+      onSuccess(code);
     }
   };
 
@@ -46,6 +52,7 @@ export default function QRScannerTask({ onSuccess }) {
             <Scanner 
               onScan={handleScan} 
               onError={handleError}
+              formats={['qr_code']}
               constraints={{ facingMode: 'environment' }} 
             />
           </div>
