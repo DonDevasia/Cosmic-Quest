@@ -11,16 +11,26 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Placeholder login logic for demonstration
     setTimeout(() => {
-      // In real app: Supabase lookup in 'teams' table by team_code
-      if (teamCode) {
-        router.push(`/team?id=${encodeURIComponent(teamCode)}`);
+      const codeStr = teamCode.trim();
+      let baseTeamCode = codeStr;
+      let role = 'leader';
+
+      if (codeStr.includes('.')) {
+        const parts = codeStr.split('.');
+        baseTeamCode = parts[0];
+        if (parts[1] === '1') role = 'player2';
+        else if (parts[1] === '2') role = 'player3';
+        else if (parts[1] === '3') role = 'player4';
+      }
+
+      if (baseTeamCode) {
+        router.push(`/team?id=${encodeURIComponent(baseTeamCode)}&role=${role}`);
       } else {
         alert('Please enter a team code');
         setIsLoading(false);
       }
-    }, 1000);
+    }, 500);
   };
 
   return (

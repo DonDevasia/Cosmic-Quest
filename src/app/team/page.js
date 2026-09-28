@@ -13,6 +13,7 @@ import DictionaryTask from '@/components/DictionaryTask';
 function TeamDashboardContent() {
   const searchParams = useSearchParams();
   const teamCode = searchParams.get('id'); // Using team_code passed from login
+  const playerRole = searchParams.get('role') || 'leader';
 
   const [team, setTeam] = useState(null);
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -23,6 +24,7 @@ function TeamDashboardContent() {
   const [keyword, setKeyword] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
+  const [connectedPlayers, setConnectedPlayers] = useState([]);
 
   const fetchTeamData = useCallback(async () => {
     if (!teamCode) return;
@@ -71,7 +73,7 @@ function TeamDashboardContent() {
       .from('team_tasks')
       .select(`
         *,
-        tasks (title, description, base_points, time_limit_seconds, venue_hint)
+        tasks (title, description, base_points, time_limit_seconds, venue_hint, puzzle_time_seconds, required_role)
       `)
       .eq('team_id', teamId)
       .eq('is_active', true)
@@ -129,6 +131,34 @@ function TeamDashboardContent() {
       supabase.removeChannel(eventSubscription);
     };
   }, [fetchTeamData]);
+
+  // Presence Subscription (Lobby)
+  useEffect(() => {
+    if (!team) return;
+
+    const room = supabase.channel(`team_lobby_${team.id}`);
+
+    room
+      .on('presence', { event: 'sync' }, () => {
+        const newState = room.presenceState();
+        const players = [];
+        for (const id in newState) {
+          newState[id].forEach(client => {
+            players.push(client.role);
+          });
+        }
+        setConnectedPlayers([...new Set(players)]);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await room.track({ role: playerRole });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(room);
+    };
+  }, [team, playerRole]);
 
   // Task Countdown Timer and Expiration
   useEffect(() => {
@@ -250,7 +280,21 @@ function TeamDashboardContent() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: '20px' }}>
           <div className="animate-pulse" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--accent-cyan)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
           <h1 className="neon-text-blue" style={{ fontSize: '3rem', textAlign: 'center' }}>WAITING FOR GAMES TO START</h1>
-          <p className="text-secondary" style={{ fontSize: '1.2rem' }}>Please wait for the Admin to initialize the global event...</p>
+          <p className="text-secondary" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Please wait for the Admin to initialize the global event...</p>
+          
+          <div style={{ background: 'rgba(0,0,0,0.6)', padding: '20px', borderRadius: '8px', border: '1px solid var(--glass-border)', minWidth: '300px' }}>
+            <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px', textAlign: 'center' }}>TEAM LOBBY</h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {['leader', 'player2', 'player3', 'player4'].map(r => (
+                <li key={r} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+                  <span style={{ color: 'white', textTransform: 'uppercase', fontWeight: 'bold' }}>{r}</span>
+                  <span style={{ color: connectedPlayers.includes(r) ? 'var(--accent-green)' : 'var(--text-secondary)' }}>
+                    {connectedPlayers.includes(r) ? 'CONNECTED' : 'WAITING...'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px', margin: '0 auto' }}>
@@ -319,7 +363,7 @@ function TeamDashboardContent() {
                     <h3 style={{ color: 'var(--accent-green)', marginBottom: '10px' }}>WAITING FOR NEXT TASK</h3>
                     <p style={{ color: 'var(--text-secondary)' }}>Good job! You completed the task before time. Please wait for the timer to expire to receive your next mission.</p>
                   </div>
-                ) : (
+                ) : (!currentTask.required_role || currentTask.required_role === 'all' || currentTask.required_role === playerRole) ? (
                   <>
                     {/* Rejection Feedback */}
                     {currentTask.admin_feedback && currentTask.status === 'In Progress' && (
@@ -533,6 +577,12 @@ function TeamDashboardContent() {
                       </div>
                     )}
                   </>
+                ) : (
+                  <div style={{ padding: '40px 20px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-red)', borderRadius: '8px', textAlign: 'center', marginTop: '20px' }}>
+                    <h3 style={{ color: 'var(--accent-red)', marginBottom: '15px', fontSize: '2rem' }}>ACCESS DENIED</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>This task can only be viewed and completed by the team's <strong style={{color: 'white', textTransform: 'uppercase'}}>{currentTask.required_role}</strong>.</p>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '20px', fontSize: '1rem', fontStyle: 'italic' }}>Your mission is to communicate with them and assist in solving the puzzle!</p>
+                  </div>
                 )}
               </>
             ) : (
