@@ -374,18 +374,11 @@ function TeamDashboardContent() {
                       </div>
                     )}
 
-                    {/* Task Submission Form for Akinator Game */}
-                    {currentTask.title === 'Akinator Game' && (
+                    {/* Task Submission Form for Tongue Twister */}
+                    {currentTask.title === 'Tongue Twister' && (
                       <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
-                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>AKINATOR TERMINAL</h3>
-                        <div style={{ position: 'relative', overflow: 'hidden', paddingTop: '56.25%', borderRadius: '8px', marginBottom: '20px' }}>
-                          <iframe 
-                            src="https://en.akinator.com/" 
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                            title="Akinator Game"
-                          />
-                        </div>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Play the game and enter the completion code given by the admin when Akinator guesses correctly.</p>
+                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>TONGUE TWISTER TERMINAL</h3>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Say the tongue twister perfectly to the Admin. Enter the completion code they provide once you succeed.</p>
                         <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                           <input 
                             type="text" 

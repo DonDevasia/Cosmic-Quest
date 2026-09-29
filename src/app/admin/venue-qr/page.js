@@ -2,16 +2,16 @@
 import { QRCodeSVG } from 'qrcode.react';
 
 const VENUES = [
-  { task: 1, title: 'Akinator Game', code: 'VENUE_01', hint: 'Look under the old oak tree in the courtyard.' },
-  { task: 2, title: 'QR Scanner', code: 'VENUE_02', hint: 'Head to the library reception desk.' },
-  { task: 3, title: 'Thugwar', code: 'VENUE_03', hint: 'Find the glowing sign in the cafeteria.' },
-  { task: 4, title: 'Object Scanner', code: 'VENUE_04', hint: 'Behind the sports equipment rack.' },
-  { task: 5, title: 'Word Game', code: 'VENUE_05', hint: 'In the main hallway, near the vending machines.' },
-  { task: 6, title: 'Convince Me', code: 'VENUE_06', hint: 'At the administrative office door.' },
-  { task: 7, title: 'Dictionary Game', code: 'VENUE_07', hint: 'By the front gate security cabin.' },
-  { task: 8, title: 'Morse Code', code: 'VENUE_08', hint: 'Inside the IT laboratory.' },
-  { task: 9, title: 'Bottle Counting', code: 'VENUE_09', hint: 'On the roof terrace.' },
-  { task: 10, title: 'TANGRAM', code: 'VENUE_10', hint: 'The final location will be revealed... basement.' }
+  { task: 1, title: 'Tongue Twister', code: 'VENUE_01', hint: 'A' },
+  { task: 2, title: 'QR Scanner', code: 'VENUE_02', hint: 'B' },
+  { task: 3, title: 'Thugwar', code: 'VENUE_03', hint: 'C' },
+  { task: 4, title: 'Object Scanner', code: 'VENUE_04', hint: 'D' },
+  { task: 5, title: 'Word Game', code: 'VENUE_05', hint: 'E' },
+  { task: 6, title: 'Convince Me', code: 'VENUE_06', hint: 'F' },
+  { task: 7, title: 'Dictionary Game', code: 'VENUE_07', hint: 'G' },
+  { task: 8, title: 'Morse Code', code: 'VENUE_08', hint: 'H' },
+  { task: 9, title: 'Bottle Counting', code: 'VENUE_09', hint: 'I' },
+  { task: 10, title: 'TANGRAM', code: 'VENUE_10', hint: 'J' }
 ];
 
 export default function VenueQrGenerator() {
