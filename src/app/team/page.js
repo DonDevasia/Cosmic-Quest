@@ -274,7 +274,7 @@ function TeamDashboardContent() {
 
   return (
     <div className="container">
-      <Navbar title={`${team.team_name}`} subtitle="Mission Control" rank="-" score={team.total_score} />
+      <Navbar title={`${team.team_name}`} subtitle="Mission Control" />
       
       {!isGameStarted ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: '20px' }}>
