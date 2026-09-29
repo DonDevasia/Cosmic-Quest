@@ -1,42 +1,41 @@
 import { NextResponse } from 'next/server';
 
 const stage1Responses = [
-  "I just... I can't even look at these messages right now. It hurts too much.",
-  "Do you have any idea how much you broke my heart? A simple text isn't going to fix this.",
-  "I'm crying while reading this. Please, just give me some space.",
-  "It's so unfair that you think you can just message me after everything that happened.",
-  "My heart sank when I saw your name pop up. I don't know if I can do this right now."
+  "I don't think we should get back together.",
+  "You had your chance.",
+  "I've already started moving on.",
+  "Can we just stay friends?",
+  "I've made my decision.",
+  "Give me some space, please."
 ];
 
 const stage2Responses = [
-  "I want to believe you, I really do, but every time I trust you I end up in tears...",
-  "Reading that makes me feel a little better, but the pain doesn't just vanish overnight.",
-  "I'm still so incredibly hurt. It feels like my chest is heavy just thinking about it.",
-  "You say that, but I'm terrified of letting my guard down again. It took so much out of me.",
-  "Part of me misses you so much it physically hurts, but the other part is just so angry."
+  "I need some time to think.",
+  "I'm scared we'll end up hurting each other again.",
+  "I don't trust you like I used to.",
+  "Saying sorry isn't enough this time.",
+  "I don't want to go through the same pain again."
 ];
 
 const stage3Responses = [
-  "I've been looking at our old photos and just crying... I want things to be how they used to be.",
-  "I'm trying so hard to keep my walls up, but you're making it really difficult right now...",
-  "I miss your voice. I miss us. But I need to know you're actually serious this time, please.",
-  "If I let you back in, you have to promise me you won't break my heart again. I can't survive it a second time.",
-  "My hands are literally shaking typing this. I want to forgive you, but I'm just so scared."
+  "I still care about you, but things have changed.",
+  "I miss you too, but I don't know if this is right.",
+  "I need actions, not promises.",
+  "Why do you want me back now?",
+  "What will be different this time?",
+  "I'm not ready for a relationship right now.",
+  "I still love you, but I need to protect myself."
 ];
 
 const stage4Responses = [
-  "Oh my god, I'm literally in tears right now... Do you really mean all of that?",
-  "I've missed you so, so much. Just hearing you say those things makes my heart ache in a good way.",
-  "I want to take you back... I really do. I just need you to hold me and tell me it's going to be okay.",
-  "You're making me cry again... but this time I think it's because I still love you so much.",
-  "Okay... my heart is completely melting. I want us to work. I want you."
+  "Maybe we can talk and see where it goes.",
+  "Okay, we can try again, but slowly."
 ];
 
 const badWordResponses = [
-  "Wow. You haven't changed at all. You're still the same toxic person who broke my heart. Goodbye.",
-  "I am literally crying right now and you talk to me like THAT?! We are done. For real this time.",
-  "That was incredibly cruel. Please delete my number. I don't deserve to be treated this way.",
-  "You know exactly how to hurt me, don't you? Please don't ever contact me again."
+  "I don't think we should get back together.",
+  "You had your chance.",
+  "I've made my decision."
 ];
 
 export async function POST(req) {
@@ -96,7 +95,7 @@ export async function POST(req) {
       reply = stage4Responses[Math.floor(Math.random() * stage4Responses.length)];
     } else {
       return NextResponse.json({ 
-        reply: "Okay... I'm crying but I forgive you. Let's patch things up. I love you so much. Come back to me. Here is the keyword to prove we patched up: PATCHED_UP", 
+        reply: "i'm crying so much right now 😭 i forgive you. i love you so much and i just want you back. here's the code to prove we patched up: PATCHED_UP", 
         success: true 
       });
     }
