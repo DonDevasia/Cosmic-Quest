@@ -470,7 +470,23 @@ function TeamDashboardContent() {
 
                     {/* Dictionary UI */}
                     {currentTask.title === 'Dictionary Game' && (
-                      <DictionaryTask onSuccess={submitKeywordToAPI} />
+                      <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
+                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>DICTIONARY TERMINAL</h3>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Complete the physical dictionary task. Enter the completion code given by the Admin once you succeed.</p>
+                        <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                          <input 
+                            type="text" 
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value.toUpperCase())}
+                            placeholder="COMPLETION KEYWORD..." 
+                            style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--glass-border)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
+                          />
+                          {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
+                          <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px' }}>
+                            SUBMIT KEYWORD
+                          </button>
+                        </form>
+                      </div>
                     )}
 
                     {/* Bottle Counting UI */}
