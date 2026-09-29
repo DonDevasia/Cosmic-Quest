@@ -44,7 +44,7 @@ export async function POST(request) {
         team_id: teamId,
         task_id: randomTask.id,
         is_active: true,
-        status: 'In Progress'
+        status: 'Assigned'
       }]);
 
     if (insertErr) {
