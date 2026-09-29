@@ -73,7 +73,7 @@ function TeamDashboardContent() {
       .from('team_tasks')
       .select(`
         *,
-        tasks (title, description, base_points, time_limit_seconds, venue_hint, puzzle_time_seconds, required_role)
+        tasks (title, description, base_points, time_limit_seconds, venue_hint)
       `)
       .eq('team_id', teamId)
       .eq('is_active', true)
