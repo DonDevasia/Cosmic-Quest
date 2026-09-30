@@ -407,7 +407,7 @@ export default function AdminDashboard() {
                             <td style={{ padding: '10px' }}>#{team.rank}</td>
                             <td style={{ padding: '10px', fontWeight: 'bold' }}>{team.name}</td>
                             <td style={{ padding: '10px', color: 'var(--accent-purple)', fontFamily: 'var(--font-mono)' }}>{team.code}</td>
-                            <td style={{ padding: '10px', color: 'var(--accent-green)' }}>{team.score}</td>
+                            <td style={{ padding: '10px', color: 'var(--accent-green)' }}><span className="meteor-icon">☄️</span>{team.score}</td>
                             <td style={{ padding: '10px' }}>-</td>
                             <td style={{ padding: '10px', color: team.status === 'Active' ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{team.status}</td>
                             <td style={{ padding: '10px' }}>

@@ -35,9 +35,19 @@ body {
   color: var(--text-primary);
   font-family: var(--font-main);
   background-image: 
+    radial-gradient(1px 1px at 15% 25%, #ffffff, transparent),
+    radial-gradient(1px 1px at 35% 65%, #ffffff, transparent),
+    radial-gradient(2px 2px at 75% 35%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 55% 85%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 85% 90%, #ffffff, transparent),
+    radial-gradient(1px 1px at 45% 15%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 95% 5%, #ffffff, transparent),
     radial-gradient(circle at 20% 40%, rgba(157, 78, 221, 0.08), transparent 40%),
     radial-gradient(circle at 80% 60%, rgba(0, 245, 255, 0.05), transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(255, 170, 0, 0.03), transparent 60%);
+  background-size: 
+    300px 300px, 250px 250px, 400px 400px, 350px 350px, 200px 200px, 150px 150px, 500px 500px,
+    100% 100%, 100% 100%, 100% 100%;
   background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
@@ -164,4 +174,18 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-cyan);
+}
+
+@keyframes float-meteor {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(10deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.meteor-icon {
+  display: inline-block;
+  animation: float-meteor 2.5s infinite ease-in-out;
+  margin-right: 4px;
+  filter: drop-shadow(0 0 4px var(--accent-cyan));
+  font-size: 1.1em;
 }

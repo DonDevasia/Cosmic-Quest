@@ -44,8 +44,8 @@ export async function POST() {
     // Teams that need assignments
     const teamsNeedingTasks = teams.filter(t => !activeTeamIds.includes(t.id));
     
-    // Tasks available to be assigned
-    let availableTasks = tasks.filter(t => !activeTaskIds.includes(t.id));
+    // Tasks available to be assigned (Pool of phase 1 tasks)
+    let availableTasks = [...tasks];
 
     if (teamsNeedingTasks.length === 0) {
       return NextResponse.json({ success: true, message: 'All teams already have active tasks' });
@@ -56,10 +56,9 @@ export async function POST() {
 
     const newAssignments = [];
     for (let i = 0; i < teamsNeedingTasks.length; i++) {
-      if (i >= availableTasks.length) break; // Run out of tasks
-      
       const team = teamsNeedingTasks[i];
-      const task = availableTasks[i];
+      // Loop through available tasks to ensure random distribution, repeating if necessary
+      const task = availableTasks[i % availableTasks.length];
 
       newAssignments.push({
         team_id: team.id,

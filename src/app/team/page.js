@@ -10,21 +10,9 @@ import ObjectScannerTask from '@/components/ObjectScannerTask';
 import DictionaryTask from '@/components/DictionaryTask';
 
 
-function getRequiredRole(teamId, taskId) {
-  const combined = `${teamId}-${taskId}`;
-  let hash = 0;
-  for (let i = 0; i < combined.length; i++) {
-    hash = (hash << 5) - hash + combined.charCodeAt(i);
-    hash |= 0;
-  }
-  const roles = ['leader', 'player2', 'player3', 'player4'];
-  return roles[Math.abs(hash) % roles.length];
-}
-
 function TeamDashboardContent() {
   const searchParams = useSearchParams();
   const teamCode = searchParams.get('id'); // Using team_code passed from login
-  const playerRole = searchParams.get('role') || 'leader';
 
   const [team, setTeam] = useState(null);
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -35,7 +23,7 @@ function TeamDashboardContent() {
   const [keyword, setKeyword] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
-  const [connectedPlayers, setConnectedPlayers] = useState([]);
+  const [completedTasksCount, setCompletedTasksCount] = useState(0);
 
   const fetchTeamData = useCallback(async () => {
     if (!teamCode) return;
@@ -71,6 +59,17 @@ function TeamDashboardContent() {
       setIsGameStarted(eventData.is_active);
     }
 
+    // 2.5 Get Completed Tasks Count
+    const { data: pastTasks } = await supabase
+      .from('team_tasks')
+      .select('task_id')
+      .eq('team_id', teamData.id)
+      .eq('is_active', false);
+      
+    if (pastTasks) {
+      setCompletedTasksCount(Math.min(pastTasks.length, 10));
+    }
+
     // 3. Check for Active Task if Game is Started
     if (eventData?.is_active) {
       await fetchActiveTask(teamData.id);
@@ -102,12 +101,6 @@ function TeamDashboardContent() {
       };
       // We assume a temporary default puzzle time of 180s (3 minutes) until later configured in DB
       taskData.puzzle_time_seconds = assignment.tasks.puzzle_time_seconds || 180;
-      // Calculate random assigned role for this task and team combo
-      if (taskData.title === 'Phase 2 - Final Destination') {
-        taskData.required_role = 'all';
-      } else {
-        taskData.required_role = getRequiredRole(assignment.team_id, assignment.task_id);
-      }
       
       setCurrentTask(taskData);
       
@@ -150,33 +143,7 @@ function TeamDashboardContent() {
     };
   }, [fetchTeamData]);
 
-  // Presence Subscription (Lobby)
-  useEffect(() => {
-    if (!team) return;
-
-    const room = supabase.channel(`team_lobby_${team.id}`);
-
-    room
-      .on('presence', { event: 'sync' }, () => {
-        const newState = room.presenceState();
-        const players = [];
-        for (const id in newState) {
-          newState[id].forEach(client => {
-            players.push(client.role);
-          });
-        }
-        setConnectedPlayers([...new Set(players)]);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await room.track({ role: playerRole });
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(room);
-    };
-  }, [team, playerRole]);
+  // Presence Subscription (Lobby) removed since it's a single device.
 
   // Task Countdown Timer and Expiration
   useEffect(() => {
@@ -199,10 +166,14 @@ function TeamDashboardContent() {
         setMasterTimeLeft(newMaster);
         setPuzzleTimeLeft(newPuzzle);
 
-        const isTaskFinished = currentTask.status === 'Completed' || currentTask.status === 'Submitted';
+        const isTaskFinished = currentTask.status === 'Completed' || currentTask.status === 'Submitted' || currentTask.status === 'Failed';
         const puzzleExpired = !isTaskFinished && newPuzzle !== null && newPuzzle <= 0;
 
-        if (newMaster <= 0 || puzzleExpired) {
+        if (puzzleExpired) {
+          handlePuzzleExpired();
+        }
+
+        if (newMaster <= 0) {
           clearInterval(timerId);
           handleTaskExpired();
         }
@@ -210,6 +181,19 @@ function TeamDashboardContent() {
     }
     return () => clearInterval(timerId);
   }, [currentTask, masterTimeLeft, puzzleTimeLeft]);
+
+  const handlePuzzleExpired = async () => {
+    try {
+      await fetch('/api/team/submit-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamId: team.id, taskId: currentTask.id, isPuzzleExpired: true, keyword: '' })
+      });
+      fetchTeamData();
+    } catch (err) {
+      console.error('Failed to report puzzle expiration');
+    }
+  };
 
   const handleTaskExpired = async () => {
     try {
@@ -222,7 +206,7 @@ function TeamDashboardContent() {
       setShowExpiredMessage(false);
       fetchTeamData();
     } catch (err) {
-      console.error('Failed to report expiration');
+      console.error('Failed to report master expiration');
     }
   };
 
@@ -299,20 +283,6 @@ function TeamDashboardContent() {
           <div className="animate-pulse" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--accent-cyan)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
           <h1 className="neon-text-blue" style={{ fontSize: '3rem', textAlign: 'center' }}>WAITING FOR LAUNCH SEQUENCE</h1>
           <p className="text-secondary" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Please wait for Fleet Command to initiate the cosmic voyage...</p>
-          
-          <div style={{ background: 'rgba(0,0,0,0.6)', padding: '20px', borderRadius: '8px', border: '1px solid var(--glass-border)', minWidth: '300px' }}>
-            <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px', textAlign: 'center' }}>STARSHIP CREW</h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {['leader', 'player2', 'player3', 'player4'].map(r => (
-                <li key={r} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                  <span style={{ color: 'white', textTransform: 'uppercase', fontWeight: 'bold' }}>{r}</span>
-                  <span style={{ color: connectedPlayers.includes(r) ? 'var(--accent-green)' : 'var(--text-secondary)' }}>
-                    {connectedPlayers.includes(r) ? 'CONNECTED' : 'WAITING...'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px', margin: '0 auto' }}>
@@ -381,9 +351,14 @@ function TeamDashboardContent() {
                   <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-green)', borderRadius: '8px', textAlign: 'center' }}>
                     <div className="animate-pulse" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px solid var(--accent-green)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite', margin: '0 auto 20px auto' }}></div>
                     <h3 style={{ color: 'var(--accent-green)', marginBottom: '10px' }}>WAITING FOR NEXT TASK</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Good job! You completed the task before time. Please wait for the timer to expire to receive your next mission.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>Good job! You completed the task before time. Please wait for the master timer to expire to receive your next mission.</p>
                   </div>
-                ) : (!currentTask.required_role || currentTask.required_role === 'all' || currentTask.required_role === playerRole) ? (
+                ) : currentTask.status === 'Failed' ? (
+                  <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-red)', borderRadius: '8px', textAlign: 'center' }}>
+                    <h3 style={{ color: 'var(--accent-red)', marginBottom: '10px', fontSize: '2rem' }}>TASK FAILED</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>You failed to solve the puzzle in time. Please wait for the master timer to expire to receive your next mission.</p>
+                  </div>
+                ) : (
                   <>
                     {/* Rejection Feedback */}
                     {currentTask.admin_feedback && currentTask.status === 'In Progress' && (
@@ -575,12 +550,6 @@ function TeamDashboardContent() {
                       </div>
                     )}
                   </>
-                ) : (
-                  <div style={{ padding: '40px 20px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-red)', borderRadius: '8px', textAlign: 'center', marginTop: '20px' }}>
-                    <h3 style={{ color: 'var(--accent-red)', marginBottom: '15px', fontSize: '2rem' }}>ACCESS DENIED</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>This task can only be viewed and completed by the team's <strong style={{color: 'white', textTransform: 'uppercase'}}>{currentTask.required_role}</strong>.</p>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '20px', fontSize: '1rem', fontStyle: 'italic' }}>Your mission is to communicate with them and assist in solving the puzzle!</p>
-                  </div>
                 )}
               </>
             ) : (
@@ -632,11 +601,11 @@ function TeamDashboardContent() {
             {/* Campaign Progress */}
             <div className="glass-panel animate-slide-up" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                <span>Directives Accomplished</span>
-                <span className="neon-text-blue" style={{ fontWeight: 'bold' }}>0 / 10</span>
+                <span>Phase 1 Directives Accomplished</span>
+                <span className="neon-text-blue" style={{ fontWeight: 'bold' }}>{completedTasksCount} / 10</span>
               </div>
               <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '0%', height: '100%', background: 'var(--accent-blue)', transition: 'width 0.5s ease' }}></div>
+                <div style={{ width: `${(completedTasksCount / 10) * 100}%`, height: '100%', background: 'var(--accent-blue)', transition: 'width 0.5s ease' }}></div>
               </div>
             </div>
           </div>

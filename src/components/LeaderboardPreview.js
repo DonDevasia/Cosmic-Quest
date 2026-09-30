@@ -28,7 +28,7 @@ export default function LeaderboardPreview({ teams }) {
               {team.name}
             </div>
             <div style={{ textAlign: 'right', color: 'var(--accent-green)', fontWeight: 'bold' }}>
-              {team.score}
+              <span className="meteor-icon">☄️</span>{team.score}
             </div>
           </div>
         ))}

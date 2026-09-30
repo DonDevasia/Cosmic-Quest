@@ -16,10 +16,10 @@ function shuffleArray(array) {
 
 export async function POST(request) {
   try {
-    const { teamId, taskId, keyword, isExpired } = await request.json();
+    const { teamId, taskId, keyword, isExpired, isPuzzleExpired } = await request.json();
     const cleanKeyword = keyword ? keyword.trim().toUpperCase() : '';
 
-    if (!teamId || !taskId || (!cleanKeyword && !isExpired)) {
+    if (!teamId || !taskId || (!cleanKeyword && !isExpired && !isPuzzleExpired)) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
@@ -55,6 +55,23 @@ export async function POST(request) {
     }
 
     const wasAlreadyCompleted = currentAssignment.status === 'Completed';
+
+    if (isPuzzleExpired) {
+      if (wasAlreadyCompleted) {
+         return NextResponse.json({ success: true, message: 'Already completed before puzzle expired.' });
+      }
+      const { error: failErr } = await supabase
+        .from('team_tasks')
+        .update({
+          status: 'Failed',
+          points_awarded: 0
+        })
+        .eq('team_id', teamId)
+        .eq('task_id', taskId);
+      
+      if (failErr) throw failErr;
+      return NextResponse.json({ success: true, message: 'Puzzle Expired. Task Failed. Waiting for master timer.' });
+    }
 
     if (!isExpired) {
       // TEAM SUBMITTED KEYWORD CORRECTLY
@@ -92,8 +109,8 @@ export async function POST(request) {
       return NextResponse.json({ success: true, message: 'Keyword Accepted. Waiting for timer.' });
 
     } else {
-      // TIMER EXPIRED
-      // If not already completed, mark as Failed
+      // MASTER TIMER EXPIRED
+      // If not already completed, mark as Failed (or keep as Failed if puzzle already expired)
       // In either case, mark is_active = false and assign next task
       
       const { error: finalizeErr } = await supabase
