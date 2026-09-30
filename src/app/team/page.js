@@ -8,6 +8,7 @@ import ConvinceMeTask from '@/components/ConvinceMeTask';
 import QRScannerTask from '@/components/QRScannerTask';
 import ObjectScannerTask from '@/components/ObjectScannerTask';
 import DictionaryTask from '@/components/DictionaryTask';
+import TangramTask from '@/components/TangramTask';
 
 
 function TeamDashboardContent() {
@@ -520,23 +521,7 @@ function TeamDashboardContent() {
 
                     {/* TANGRAM UI */}
                     {currentTask.title === 'TANGRAM' && (
-                      <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
-                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>TANGRAM PUZZLE</h3>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Solve the Tangram puzzle at the venue. Obtain the completion code from the admin once finished.</p>
-                        <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-                          <input 
-                            type="text" 
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value.toUpperCase())}
-                            placeholder="COMPLETION CODE..." 
-                            style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--glass-border)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
-                          />
-                          {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
-                          <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px' }}>
-                            VERIFY COMPLETION
-                          </button>
-                        </form>
-                      </div>
+                      <TangramTask onSuccess={submitKeywordToAPI} />
                     )}
 
 

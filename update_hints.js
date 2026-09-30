@@ -13,15 +13,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function updateHints() {
   const hints = {
-    2: 'To meet the master , Two steps, zero excuses, nine chances…\nSounds like a strange combination, right? 👀',
-    9: 'There existed Three little pigs, each one called E,\nWhen it was a hot day, they wanted to rest under a TREE.'
+    7: "9. Don't let my basketball break your bike's mirror.",
+    8: "Kisi Ka Bhai Kisi Ki Jaan" // The user changed it in schema.sql but didn't update the DB. So I'll do it here!
   };
 
   for (const [taskId, hint] of Object.entries(hints)) {
     const { error } = await supabase.from('tasks').update({ venue_hint: hint }).eq('task_number', parseInt(taskId));
     if (error) console.error(`Error updating task ${taskId}:`, error);
   }
-  console.log('Hints 2 and 9 updated successfully!');
+  console.log('Hints 7 and 8 updated successfully!');
 }
 
 updateHints();
