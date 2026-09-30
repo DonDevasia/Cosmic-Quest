@@ -13,19 +13,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function updateHints() {
   const hints = {
-    1: 'I go forward, I go back, yet never leave my place',
-    3: '         (0, 1)\n\n\n(-1, 0)     ?     (1, 0)\n\n            \n           (0, -1)',
-    4: 'carbon,helium,',
-    5: 'Oru tulli , pallatulli ,peru vellam',
-    6: "Machines have their secrets, but don't look for them on the floor. Search where every step takes you closer",
-    8: 'Follow the path to where many stay; before you arrive, find where the wheels choose to stay'
+    2: 'To meet the master , Two steps, zero excuses, nine chances…\nSounds like a strange combination, right? 👀',
+    9: 'There existed Three little pigs, each one called E,\nWhen it was a hot day, they wanted to rest under a TREE.'
   };
 
   for (const [taskId, hint] of Object.entries(hints)) {
     const { error } = await supabase.from('tasks').update({ venue_hint: hint }).eq('task_number', parseInt(taskId));
     if (error) console.error(`Error updating task ${taskId}:`, error);
   }
-  console.log('Venue hints updated successfully!');
+  console.log('Hints 2 and 9 updated successfully!');
 }
 
 updateHints();

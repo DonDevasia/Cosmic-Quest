@@ -334,7 +334,17 @@ function TeamDashboardContent() {
                       </div>
                     )}
                     <h3 style={{ color: 'var(--accent-purple)', marginBottom: '10px' }}>TRAVEL TO VENUE</h3>
-                    <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '20px' }}>"{currentTask.venue_hint}"</p>
+                    {currentTask.venue_hint.startsWith('IMAGE:') ? (
+                      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                        <img 
+                          src={currentTask.venue_hint.replace('IMAGE:', '')} 
+                          alt="Venue Clue" 
+                          style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', border: '2px solid var(--accent-purple)' }} 
+                        />
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '20px' }}>"{currentTask.venue_hint}"</p>
+                    )}
                     
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>
                       {currentTask.title.includes('Phase 2') ? 'Scan the QR code at the location to advance.' : 'Scan the Venue QR code at the location to unlock the puzzle.'}
