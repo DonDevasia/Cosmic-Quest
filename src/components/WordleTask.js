@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-const TARGET_WORD = 'BIBLE';
+const TARGET_WORD = 'SPACE';
 const MAX_GUESSES = 6;
 
 export default function WordleTask({ onSuccess }) {

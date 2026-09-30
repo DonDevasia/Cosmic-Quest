@@ -1,4 +1,6 @@
 import './globals.css';
+import Starfield from '@/components/Starfield';
+import Astronaut from '@/components/Astronaut';
 
 export const metadata = {
   title: 'Treasure Hunt Mission Control',
@@ -9,7 +11,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <Starfield />
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          {children}
+        </div>
       </body>
     </html>
   );

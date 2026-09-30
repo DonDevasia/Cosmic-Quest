@@ -167,13 +167,14 @@ function TeamDashboardContent() {
         setPuzzleTimeLeft(newPuzzle);
 
         const isTaskFinished = currentTask.status === 'Completed' || currentTask.status === 'Submitted' || currentTask.status === 'Failed';
+        const isPhase2 = currentTask.task_number > 10;
         const puzzleExpired = !isTaskFinished && newPuzzle !== null && newPuzzle <= 0;
 
-        if (puzzleExpired) {
+        if (puzzleExpired && !isPhase2) {
           handlePuzzleExpired();
         }
 
-        if (newMaster <= 0) {
+        if (newMaster <= 0 && !isPhase2) {
           clearInterval(timerId);
           handleTaskExpired();
         }
@@ -298,29 +299,31 @@ function TeamDashboardContent() {
                 <h2 className="neon-text-blue" style={{ fontSize: '2.5rem', marginBottom: '20px' }}>{currentTask.title}</h2>
                 
                 {/* Timers */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
-                  {/* Master Timer */}
-                  <div>
-                    <div className="neon-text-purple" style={{ fontSize: currentTask.started_at ? '2.5rem' : '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: masterTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
-                      {formatTime(masterTimeLeft)}
-                    </div>
-                    <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
-                      DIRECTIVE TIME LIMIT
-                    </p>
-                  </div>
-
-                  {/* Puzzle Timer */}
-                  {currentTask.started_at && puzzleTimeLeft !== null && (
+                {currentTask.task_number <= 10 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
+                    {/* Master Timer */}
                     <div>
-                      <div className="neon-text-blue" style={{ fontSize: '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: puzzleTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
-                        {formatTime(puzzleTimeLeft)}
+                      <div className="neon-text-purple" style={{ fontSize: currentTask.started_at ? '2.5rem' : '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: masterTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
+                        {formatTime(masterTimeLeft)}
                       </div>
                       <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
-                        PUZZLE TIME LIMIT
+                        DIRECTIVE TIME LIMIT
                       </p>
                     </div>
-                  )}
-                </div>
+
+                    {/* Puzzle Timer */}
+                    {currentTask.started_at && puzzleTimeLeft !== null && (
+                      <div>
+                        <div className="neon-text-blue" style={{ fontSize: '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: puzzleTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
+                          {formatTime(puzzleTimeLeft)}
+                        </div>
+                        <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
+                          PUZZLE TIME LIMIT
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {currentTask.status === 'Assigned' ? (
                   <div style={{ padding: '20px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-purple)', borderRadius: '8px' }}>
@@ -334,10 +337,10 @@ function TeamDashboardContent() {
                     <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '20px' }}>"{currentTask.venue_hint}"</p>
                     
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>
-                      {currentTask.title.includes('Phase 2 - QR') ? 'Scan the QR code at the location to advance.' : 'Scan the Venue QR code at the location to unlock the puzzle.'}
+                      {currentTask.title.includes('Phase 2') ? 'Scan the QR code at the location to advance.' : 'Scan the Venue QR code at the location to unlock the puzzle.'}
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <QRScannerTask onSuccess={currentTask.title.includes('Phase 2 - QR') ? submitKeywordToAPI : startTaskFromQR} />
+                      <QRScannerTask onSuccess={currentTask.title.includes('Phase 2') ? submitKeywordToAPI : startTaskFromQR} />
                       {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '1.1rem', marginTop: '15px', fontWeight: 'bold' }}>{submitError}</p>}
                     </div>
                   </div>
@@ -526,29 +529,7 @@ function TeamDashboardContent() {
                       </div>
                     )}
 
-                    {/* Phase 2 QR Tasks are now handled directly from the Assigned screen, so we don't need their In Progress UI anymore, except for Final Destination */}
-                    {/* Phase 2 Final Destination */}
-                    {currentTask.title === 'Phase 2 - Final Destination' && (
-                      <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-purple)', borderRadius: '8px', textAlign: 'center' }}>
-                        <h3 className="neon-text-purple" style={{ marginBottom: '15px' }}>FINAL DESTINATION: CUPSTACKING</h3>
-                        <p style={{ color: 'white', fontSize: '1.2rem', marginBottom: '20px' }}>
-                          Head to the final location! Perform the cupstacking challenge. The first team to complete it and enter the final keyword wins!
-                        </p>
-                        <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-                          <input 
-                            type="text" 
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value.toUpperCase())}
-                            placeholder="FINAL KEYWORD..." 
-                            style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.8)', border: '2px solid var(--accent-purple)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
-                          />
-                          {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
-                          <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
-                            CLAIM VICTORY
-                          </button>
-                        </form>
-                      </div>
-                    )}
+
                   </>
                 )}
               </>
@@ -560,43 +541,6 @@ function TeamDashboardContent() {
         </div>
         
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Team Roster */}
-            <div className="glass-panel animate-slide-up" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <h3 className="neon-text-blue" style={{ marginBottom: '5px' }}>Starship Crew</h3>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(255, 0, 60, 0.05)', border: '1px solid var(--accent-red)', borderRadius: '6px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>A</div>
-                <div>
-                  <p style={{ color: 'var(--accent-red)', fontSize: '0.8rem', fontWeight: 'bold' }}>CAPTAIN</p>
-                  <p style={{ fontWeight: 'bold' }}>{team.member_a}</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(0, 240, 255, 0.05)', border: '1px solid var(--accent-cyan)', borderRadius: '6px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'black' }}>B</div>
-                <div>
-                  <p style={{ color: 'var(--accent-cyan)', fontSize: '0.8rem', fontWeight: 'bold' }}>ROLE B</p>
-                  <p style={{ fontWeight: 'bold' }}>{team.member_b}</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(157, 78, 221, 0.05)', border: '1px solid var(--accent-purple)', borderRadius: '6px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>C</div>
-                <div>
-                  <p style={{ color: 'var(--accent-purple)', fontSize: '0.8rem', fontWeight: 'bold' }}>ROLE C</p>
-                  <p style={{ fontWeight: 'bold' }}>{team.member_c}</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(0, 255, 136, 0.05)', border: '1px solid var(--accent-green)', borderRadius: '6px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'black' }}>D</div>
-                <div>
-                  <p style={{ color: 'var(--accent-green)', fontSize: '0.8rem', fontWeight: 'bold' }}>ROLE D</p>
-                  <p style={{ fontWeight: 'bold' }}>{team.member_d}</p>
-                </div>
-              </div>
-
-            </div>
 
             {/* Campaign Progress */}
             <div className="glass-panel animate-slide-up" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -189,3 +189,92 @@ body {
   filter: drop-shadow(0 0 4px var(--accent-cyan));
   font-size: 1.1em;
 }
+
+/* Background Floating Space Elements */
+.space-elements {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.space-element {
+  position: absolute;
+  /* Making emojis look elegant and sci-fi */
+  filter: grayscale(0.6) opacity(0.15) sepia(0.5) hue-rotate(180deg) drop-shadow(0 0 20px rgba(0, 245, 255, 0.8));
+}
+
+.rocket {
+  font-size: 3rem;
+  top: 15%;
+  left: -10%;
+  animation: fly-across 45s linear infinite;
+}
+
+.astronaut {
+  font-size: 4rem;
+  bottom: -15%;
+  right: 15%;
+  animation: float-up 55s linear infinite;
+  filter: grayscale(0.8) opacity(0.2) drop-shadow(0 0 15px rgba(157, 78, 221, 0.8));
+}
+
+.asteroid-1 {
+  font-size: 2rem;
+  top: -10%;
+  left: 30%;
+  animation: fall-down 35s linear infinite;
+}
+
+.asteroid-2 {
+  font-size: 3rem;
+  top: 60%;
+  right: -10%;
+  animation: drift-left 50s linear infinite;
+}
+
+.asteroid-3 {
+  font-size: 1.5rem;
+  bottom: -10%;
+  left: 60%;
+  animation: drift-up 40s linear infinite;
+}
+
+@keyframes fly-across {
+  0% { transform: translate(0, 0) rotate(45deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(120vw, -40vh) rotate(45deg); opacity: 0; }
+}
+
+@keyframes float-up {
+  0% { transform: translate(0, 0) rotate(-15deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(-30vw, -120vh) rotate(35deg); opacity: 0; }
+}
+
+@keyframes fall-down {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(40vw, 120vh) rotate(180deg); opacity: 0; }
+}
+
+@keyframes drift-left {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(-120vw, 30vh) rotate(-90deg); opacity: 0; }
+}
+
+@keyframes drift-up {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(-20vw, -120vh) rotate(90deg); opacity: 0; }
+}

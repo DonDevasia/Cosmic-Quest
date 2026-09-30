@@ -283,6 +283,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleTestTask = async (taskId) => {
+    try {
+      const res = await fetch('/api/admin/test-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taskNumber: taskId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.open(`/team?id=${data.teamCode}`, '_blank');
+      } else {
+        alert('Failed to launch test: ' + data.message);
+      }
+    } catch (err) {
+      alert('Error launching test mode');
+    }
+  };
+
   return (
     <div className="container">
       <Navbar title="Fleet Command Center" subtitle="Cosmic Mission Control" />
@@ -455,7 +473,10 @@ export default function AdminDashboard() {
                       <h4 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>{task.title}</h4>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.8rem', color: task.status === 'Locked' ? 'var(--text-secondary)' : 'var(--accent-cyan)' }}>{task.status}</span>
-                        <button className="cyber-button" style={{ padding: '2px 8px', fontSize: '0.6rem' }}>Edit</button>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button onClick={() => handleTestTask(task.id)} className="cyber-button" style={{ padding: '2px 8px', fontSize: '0.6rem', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>Test</button>
+                          <button className="cyber-button" style={{ padding: '2px 8px', fontSize: '0.6rem' }}>Edit</button>
+                        </div>
                       </div>
                     </div>
                   ))}

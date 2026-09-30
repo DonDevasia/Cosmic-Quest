@@ -26,7 +26,7 @@ export async function POST(request) {
     // 1. Verify the keyword against the tasks table
     const { data: task, error: taskErr } = await supabase
       .from('tasks')
-      .select('completion_keyword, base_points')
+      .select('completion_keyword, base_points, task_number')
       .eq('id', taskId)
       .single();
 
@@ -73,19 +73,41 @@ export async function POST(request) {
       return NextResponse.json({ success: true, message: 'Puzzle Expired. Task Failed. Waiting for master timer.' });
     }
 
+    let shouldAssignNextTask = false;
+
     if (!isExpired) {
       // TEAM SUBMITTED KEYWORD CORRECTLY
       if (wasAlreadyCompleted) {
         return NextResponse.json({ success: true, message: 'Task already completed.' });
       }
 
-      // Mark the task as Completed, award points, but keep is_active = true
+      const isPhase2 = task.task_number > 10;
+      let pointsToAward = task.base_points;
+
+      // Dynamic scoring for Final Destination
+      if (task.task_number === 14) {
+        const { data: previousWinners, error: countErr } = await supabase
+          .from('team_tasks')
+          .select('id')
+          .eq('task_id', taskId)
+          .eq('status', 'Completed');
+
+        if (!countErr && previousWinners) {
+          const completedCount = previousWinners.length;
+          // 1st gets 1000 (if base is 1000), 2nd gets 900, 3rd 800, etc. Minimum 100.
+          pointsToAward = Math.max(100, task.base_points - (completedCount * 100));
+        }
+      }
+
+      // Mark the task as Completed, award points. Keep is_active=true if Phase 1 so they wait for timer. 
+      // If Phase 2, mark is_active=false immediately.
       const { error: completeErr } = await supabase
         .from('team_tasks')
         .update({
           status: 'Completed',
+          is_active: isPhase2 ? false : true,
           completed_at: new Date().toISOString(),
-          points_awarded: task.base_points
+          points_awarded: pointsToAward
         })
         .eq('team_id', teamId)
         .eq('task_id', taskId);
@@ -102,17 +124,19 @@ export async function POST(request) {
       if (!teamFetchErr && teamData) {
         await supabase
           .from('teams')
-          .update({ total_score: teamData.total_score + task.base_points })
+          .update({ total_score: teamData.total_score + pointsToAward })
           .eq('id', teamId);
       }
 
-      return NextResponse.json({ success: true, message: 'Keyword Accepted. Waiting for timer.' });
+      if (!isPhase2) {
+        return NextResponse.json({ success: true, message: 'Keyword Accepted. Waiting for timer.' });
+      }
+      
+      shouldAssignNextTask = true;
 
     } else {
       // MASTER TIMER EXPIRED
-      // If not already completed, mark as Failed (or keep as Failed if puzzle already expired)
-      // In either case, mark is_active = false and assign next task
-      
+      // If not already completed, mark as Failed. Mark is_active = false.
       const { error: finalizeErr } = await supabase
         .from('team_tasks')
         .update({
@@ -124,7 +148,10 @@ export async function POST(request) {
         .eq('task_id', taskId);
 
       if (finalizeErr) throw finalizeErr;
+      shouldAssignNextTask = true;
+    }
 
+    if (shouldAssignNextTask) {
       // Assign the next task
       const { data: pastTasks, error: pastErr } = await supabase
         .from('team_tasks')
@@ -146,10 +173,17 @@ export async function POST(request) {
         .filter(n => n !== undefined);
 
       const phase1Completed = [1,2,3,4,5,6,7,8,9,10].every(num => completedTaskNumbers.includes(num));
+      const currentTaskNumber = task.task_number;
 
       let nextTask = null;
 
-      if (!phase1Completed) {
+      // If they are already in Phase 2, just give them the next Phase 2 task in sequence!
+      if (currentTaskNumber >= 11) {
+        if (currentTaskNumber === 11) nextTask = allTasks.find(t => t.task_number === 12);
+        else if (currentTaskNumber === 12) nextTask = allTasks.find(t => t.task_number === 13);
+        else if (currentTaskNumber === 13) nextTask = allTasks.find(t => t.task_number === 14);
+        else nextTask = null; // Completed Final Destination
+      } else if (!phase1Completed) {
         let availableTasks = allTasks.filter(t => t.task_number <= 10 && !pastTaskIds.includes(t.id));
         if (availableTasks.length > 0) {
           availableTasks = shuffleArray([...availableTasks]);
@@ -182,7 +216,7 @@ export async function POST(request) {
 
       if (assignErr) throw assignErr;
 
-      return NextResponse.json({ success: true, message: 'Timer Expired. Next Task Assigned.' });
+      return NextResponse.json({ success: true, message: 'Next Task Assigned.' });
     }
 
   } catch (error) {

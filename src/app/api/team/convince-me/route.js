@@ -95,7 +95,7 @@ export async function POST(req) {
       reply = stage4Responses[Math.floor(Math.random() * stage4Responses.length)];
     } else {
       return NextResponse.json({ 
-        reply: "i'm crying so much right now 😭 i forgive you. i love you so much and i just want you back. here's the code to prove we patched up: PATCHED_UP", 
+        reply: "i'm crying so much right now 😭 i forgive you. i love you so much and i just want you back. here's the code to prove we patched up: ONE", 
         success: true 
       });
     }

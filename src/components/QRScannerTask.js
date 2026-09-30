@@ -45,6 +45,26 @@ export default function QRScannerTask({ onSuccess }) {
           >
             ACTIVATE CAMERA
           </button>
+
+          <button
+            onClick={() => {
+              const code = window.prompt("SIMULATE SCAN: Enter the QR Code keyword (e.g. LOC1_CODE, LOC2_CODE, FINAL_DEST):");
+              if (code) {
+                onSuccess(code.trim());
+              }
+            }}
+            style={{ 
+              marginTop: '10px', 
+              padding: '8px 15px', 
+              background: 'transparent', 
+              border: '1px dashed rgba(255,255,255,0.3)', 
+              color: 'rgba(255,255,255,0.5)', 
+              cursor: 'pointer',
+              fontSize: '0.8rem'
+            }}
+          >
+            DEV: Simulate Scan
+          </button>
         </div>
       ) : (
         <div style={{ maxWidth: '400px', margin: '0 auto', position: 'relative' }}>

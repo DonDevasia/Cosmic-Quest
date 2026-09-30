@@ -88,16 +88,22 @@ INSERT INTO event_state (is_active) VALUES (false);
 
 -- Insert 10 tasks
 INSERT INTO tasks (task_number, title, description, base_points, status, completion_keyword, start_keyword, venue_hint) VALUES 
-(1, 'Tongue Twister', 'Say the tongue twister perfectly without making a mistake', 1000, 'Locked', 'TWISTED', 'VENUE_01', 'A'),
-(2, 'QR Scanner', 'Scan and decode the hidden QR codes', 1000, 'Locked', 'THE_ARCHITECT', 'VENUE_02', 'B'),
-(3, 'Thugwar', 'Compete in the Thugwar challenge', 1000, 'Locked', 'THUG123', 'VENUE_03', 'C'),
-(4, 'Object Scanner', 'Identify the correct objects', 1000, 'Locked', NULL, 'VENUE_04', 'D'),
-(5, 'Word Game', 'Solve the linguistic puzzles', 1000, 'Locked', 'BIBLE', 'VENUE_05', 'E'),
-(6, 'Convince Me', 'Convince your virtual ex-gf to patch up with you', 1000, 'Locked', 'PATCHED_UP', 'VENUE_06', 'F'),
-(7, 'Dictionary Game', 'Identify the correct term from the dictionary definition', 1000, 'Locked', 'DAEMON', 'VENUE_07', 'G'),
-(8, 'Morse Code', 'Decode the intercepted transmissions', 1000, 'Locked', 'GROUND', 'VENUE_08', 'H'),
-(9, 'Bottle Counting', 'Analyze the image and count the bottles', 1000, 'Locked', '42', 'VENUE_09', 'I'),
-(10, 'TANGRAM', 'Solve the Tangram puzzle', 1000, 'Locked', 'SHAPES', 'VENUE_10', 'J'),
+(1, 'Tongue Twister', 'Say the tongue twister perfectly without making a mistake', 1000, 'Locked', 'HAHAHA', 'VENUE_01', 'I go forward, I go back, yet never leave my place'),
+(2, 'QR Scanner', 'Scan and decode the hidden QR codes', 1000, 'Locked', 'THE_ARCHITECT', 'VENUE_02', ''),
+(3, 'Thugwar', 'Compete in the Thugwar challenge', 1000, 'Locked', '12223', 'VENUE_03', '         (0, 1)
+
+
+(-1, 0)     ?     (1, 0)
+
+            
+           (0, -1)'),
+(4, 'Object Scanner', 'Identify the correct objects', 1000, 'Locked', NULL, 'VENUE_04', 'carbon,helium,'),
+(5, 'Word Game', 'Solve the linguistic puzzles', 1000, 'Locked', 'SPACE', 'VENUE_05', 'Oru tulli , pallatulli ,peru vellam'),
+(6, 'Convince Me', 'Convince your virtual ex-gf to patch up with you', 1000, 'Locked', 'ONE', 'VENUE_06', 'Machines have their secrets, but don''t look for them on the floor. Search where every step takes you closer'),
+(7, 'Dictionary Game', 'Identify the correct term from the dictionary definition', 1000, 'Locked', '7272', 'VENUE_07', ''),
+(8, 'Morse Code', 'Decode the intercepted transmissions', 1000, 'Locked', 'GROUND', 'VENUE_08', 'Follow the path to where many stay; before you arrive, find where the wheels choose to stay'),
+(9, 'Bottle Counting', 'Analyze the image and count the bottles', 1000, 'Locked', '42', 'VENUE_09', ''),
+(10, 'TANGRAM', 'Solve the Tangram puzzle', 1000, 'Locked', 'SMART', 'VENUE_10', ''),
 (11, 'Phase 2 - QR 1', 'Find the QR code at Location 1', 1000, 'Locked', 'LOC1_CODE', 'VENUE_11', 'K'),
 (12, 'Phase 2 - QR 2', 'Find the QR code at Location 2', 1000, 'Locked', 'LOC2_CODE', 'VENUE_12', 'L'),
 (13, 'Phase 2 - QR 3', 'Find the QR code at Location 3', 1000, 'Locked', 'LOC3_CODE', 'VENUE_13', 'M'),
