@@ -88,16 +88,20 @@ INSERT INTO event_state (is_active) VALUES (false);
 
 -- Insert 10 tasks
 INSERT INTO tasks (task_number, title, description, base_points, status, completion_keyword, start_keyword, venue_hint) VALUES 
-(1, 'Tongue Twister', 'Say the tongue twister perfectly without making a mistake', 100, 'Locked', 'TWISTED', 'VENUE_01', 'A'),
-(2, 'QR Scanner', 'Scan and decode the hidden QR codes', 100, 'Locked', 'THE_ARCHITECT', 'VENUE_02', 'B'),
-(3, 'Thugwar', 'Compete in the Thugwar challenge', 100, 'Locked', 'THUG123', 'VENUE_03', 'C'),
-(4, 'Object Scanner', 'Identify the correct objects', 100, 'Locked', NULL, 'VENUE_04', 'D'),
-(5, 'Word Game', 'Solve the linguistic puzzles', 150, 'Locked', 'BIBLE', 'VENUE_05', 'E'),
-(6, 'Convince Me', 'Convince your virtual ex-gf to patch up with you', 150, 'Locked', 'PATCHED_UP', 'VENUE_06', 'F'),
-(7, 'Dictionary Game', 'Identify the correct term from the dictionary definition', 200, 'Locked', 'DAEMON', 'VENUE_07', 'G'),
-(8, 'Morse Code', 'Decode the intercepted transmissions', 200, 'Locked', 'GROUND', 'VENUE_08', 'H'),
-(9, 'Bottle Counting', 'Analyze the image and count the bottles', 100, 'Locked', '42', 'VENUE_09', 'I'),
-(10, 'TANGRAM', 'Solve the Tangram puzzle', 100, 'Locked', 'SHAPES', 'VENUE_10', 'J');
+(1, 'Tongue Twister', 'Say the tongue twister perfectly without making a mistake', 10, 'Locked', 'TWISTED', 'VENUE_01', 'A'),
+(2, 'QR Scanner', 'Scan and decode the hidden QR codes', 15, 'Locked', 'THE_ARCHITECT', 'VENUE_02', 'B'),
+(3, 'Thugwar', 'Compete in the Thugwar challenge', 5, 'Locked', 'THUG123', 'VENUE_03', 'C'),
+(4, 'Object Scanner', 'Identify the correct objects', 10, 'Locked', NULL, 'VENUE_04', 'D'),
+(5, 'Word Game', 'Solve the linguistic puzzles', 5, 'Locked', 'BIBLE', 'VENUE_05', 'E'),
+(6, 'Convince Me', 'Convince your virtual ex-gf to patch up with you', 20, 'Locked', 'PATCHED_UP', 'VENUE_06', 'F'),
+(7, 'Dictionary Game', 'Identify the correct term from the dictionary definition', 5, 'Locked', 'DAEMON', 'VENUE_07', 'G'),
+(8, 'Morse Code', 'Decode the intercepted transmissions', 5, 'Locked', 'GROUND', 'VENUE_08', 'H'),
+(9, 'Bottle Counting', 'Analyze the image and count the bottles', 10, 'Locked', '42', 'VENUE_09', 'I'),
+(10, 'TANGRAM', 'Solve the Tangram puzzle', 15, 'Locked', 'SHAPES', 'VENUE_10', 'J'),
+(11, 'Phase 2 - QR 1', 'Find the QR code at Location 1', 10, 'Locked', 'LOC1_CODE', 'VENUE_11', 'K'),
+(12, 'Phase 2 - QR 2', 'Find the QR code at Location 2', 10, 'Locked', 'LOC2_CODE', 'VENUE_12', 'L'),
+(13, 'Phase 2 - QR 3', 'Find the QR code at Location 3', 10, 'Locked', 'LOC3_CODE', 'VENUE_13', 'M'),
+(14, 'Phase 2 - Final Destination', 'Reach the final location to claim victory', 20, 'Locked', 'VICTORY', 'VENUE_14', 'N');
 
 -- Enable Supabase Realtime for these tables
 alter publication supabase_realtime add table teams;

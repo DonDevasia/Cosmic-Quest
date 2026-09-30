@@ -46,11 +46,10 @@ export async function POST(request) {
         
       if (taskErr || !task) throw taskErr || new Error("Task not found");
 
-      // 2. Mark task as Completed
+      // 2. Mark task as Completed (Keep is_active true so timer can expire and client shows waiting for next task)
       const { error: completeErr } = await supabase
         .from('team_tasks')
         .update({
-          is_active: false,
           status: 'Completed',
           completed_at: new Date().toISOString(),
           points_awarded: task.base_points,
@@ -75,42 +74,7 @@ export async function POST(request) {
           .eq('id', teamId);
       }
 
-      // 4. Assign next random task
-      const { data: pastTasks, error: pastErr } = await supabase
-        .from('team_tasks')
-        .select('task_id')
-        .eq('team_id', teamId);
-        
-      if (pastErr) throw pastErr;
-      const pastTaskIds = pastTasks.map(t => t.task_id);
-
-      const { data: allTasks, error: allTaskErr } = await supabase
-        .from('tasks')
-        .select('id');
-        
-      if (allTaskErr) throw allTaskErr;
-
-      let availableTasks = allTasks.filter(t => !pastTaskIds.includes(t.id));
-
-      if (availableTasks.length === 0) {
-        return NextResponse.json({ success: true, message: 'Task Approved. All missions completed!' });
-      }
-
-      availableTasks = shuffleArray([...availableTasks]);
-      const nextTask = availableTasks[0];
-
-      const { error: assignErr } = await supabase
-        .from('team_tasks')
-        .insert([{
-          team_id: teamId,
-          task_id: nextTask.id,
-          is_active: true,
-          status: 'Assigned' // Crucial to maintain the 'Travel to Venue' step
-        }]);
-
-      if (assignErr) throw assignErr;
-      
-      return NextResponse.json({ success: true, message: 'Task Approved. Next task assigned.' });
+      return NextResponse.json({ success: true, message: 'Task Approved. Waiting for timer to expire.' });
     }
 
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 });

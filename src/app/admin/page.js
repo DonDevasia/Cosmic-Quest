@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [isEventRunning, setIsEventRunning] = useState(false);
   const [eventStartTime, setEventStartTime] = useState(null);
   const [verifications, setVerifications] = useState([]);
+  const [selectedTeamForScore, setSelectedTeamForScore] = useState('');
 
   // Fetch teams from DB and subscribe to live changes
   useEffect(() => {
@@ -254,9 +255,37 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleQuickScore = async (pointsChange) => {
+    if (!selectedTeamForScore) {
+      alert('Please select a team first');
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teamId: selectedTeamForScore,
+          taskId: null,
+          pointsChange,
+          reason: 'Admin Quick Score'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Optimistic UI update will happen via Supabase realtime subscription
+        alert(data.message);
+      } else {
+        alert('Failed: ' + data.message);
+      }
+    } catch (err) {
+      alert('Error updating score');
+    }
+  };
+
   return (
     <div className="container">
-      <Navbar title="Admin Dashboard" subtitle="Event Management System" />
+      <Navbar title="Fleet Command Center" subtitle="Cosmic Mission Control" />
       
       <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap' }}>
         {['overview', 'teams', 'tasks', 'scores', 'verifications'].map(tab => (
@@ -274,10 +303,10 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '24px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
         
         {/* Main Content Area */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ flex: '1 1 60%', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           {activeTab === 'overview' && (
             <div className="glass-panel animate-slide-up" style={{ padding: '30px' }}>
@@ -294,10 +323,10 @@ export default function AdminDashboard() {
                   <p className="neon-text-blue" style={{ fontSize: '2rem', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>
                     {formatTime(eventTimeLeft)}
                   </p>
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
                     <button className="cyber-button" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>Pause</button>
                     <button onClick={handleResetEvent} className="cyber-button" style={{ padding: '4px 8px', fontSize: '0.7rem', borderColor: 'var(--accent-red)', color: 'var(--text-secondary)' }}>Reset</button>
-                    <button onClick={handleStartEvent} className="cyber-button" style={{ padding: '4px 8px', fontSize: '0.7rem', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>GLOBAL START GAME</button>
+                    <button onClick={handleStartEvent} className="cyber-button" style={{ padding: '4px 8px', fontSize: '0.7rem', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>INITIATE FLEET LAUNCH</button>
                   </div>
                 </div>
 
@@ -325,7 +354,7 @@ export default function AdminDashboard() {
                       value={newTeamName}
                       onChange={(e) => setNewTeamName(e.target.value)}
                       className="glow-border-blue"
-                      placeholder="e.g. Cyber Ninjas"
+                      placeholder="e.g. Apollo Vanguard"
                       style={{ width: '100%', padding: '10px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--glass-border)', borderRadius: '4px', color: 'white' }}
                       required
                     />
@@ -352,45 +381,47 @@ export default function AdminDashboard() {
 
               <div className="glass-panel animate-slide-up" style={{ padding: '30px' }}>
                 <h3 className="neon-text-blue" style={{ marginBottom: '20px' }}>Team Management</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
-                      <th style={{ padding: '10px' }}>Rank</th>
-                      <th style={{ padding: '10px' }}>Team</th>
-                      <th style={{ padding: '10px' }}>Login Code</th>
-                      <th style={{ padding: '10px' }}>Score</th>
-                      <th style={{ padding: '10px' }}>Current Task</th>
-                      <th style={{ padding: '10px' }}>Status</th>
-                      <th style={{ padding: '10px' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teams.length === 0 ? (
-                      <tr>
-                        <td colSpan="7" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                          No teams generated yet. Use the form above to create teams.
-                        </td>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
+                        <th style={{ padding: '10px' }}>Rank</th>
+                        <th style={{ padding: '10px' }}>Team</th>
+                        <th style={{ padding: '10px' }}>Login Code</th>
+                        <th style={{ padding: '10px' }}>Score</th>
+                        <th style={{ padding: '10px' }}>Current Directive</th>
+                        <th style={{ padding: '10px' }}>Status</th>
+                        <th style={{ padding: '10px' }}>Action</th>
                       </tr>
-                    ) : (
-                      teams.map(team => (
-                        <tr key={team.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '10px' }}>#{team.rank}</td>
-                          <td style={{ padding: '10px', fontWeight: 'bold' }}>{team.name}</td>
-                          <td style={{ padding: '10px', color: 'var(--accent-purple)', fontFamily: 'var(--font-mono)' }}>{team.code}</td>
-                          <td style={{ padding: '10px', color: 'var(--accent-green)' }}>{team.score}</td>
-                          <td style={{ padding: '10px' }}>-</td>
-                          <td style={{ padding: '10px', color: team.status === 'Active' ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{team.status}</td>
-                          <td style={{ padding: '10px' }}>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                               <button className="cyber-button" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>Edit</button>
-                               <button onClick={() => handleDeleteTeam(team.id)} className="cyber-button" style={{ padding: '4px 10px', fontSize: '0.7rem', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>Delete</button>
-                            </div>
+                    </thead>
+                    <tbody>
+                      {teams.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                            No teams generated yet. Use the form above to create teams.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        teams.map(team => (
+                          <tr key={team.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '10px' }}>#{team.rank}</td>
+                            <td style={{ padding: '10px', fontWeight: 'bold' }}>{team.name}</td>
+                            <td style={{ padding: '10px', color: 'var(--accent-purple)', fontFamily: 'var(--font-mono)' }}>{team.code}</td>
+                            <td style={{ padding: '10px', color: 'var(--accent-green)' }}>{team.score}</td>
+                            <td style={{ padding: '10px' }}>-</td>
+                            <td style={{ padding: '10px', color: team.status === 'Active' ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{team.status}</td>
+                            <td style={{ padding: '10px' }}>
+                              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                 <button className="cyber-button" style={{ padding: '4px 10px', fontSize: '0.7rem' }}>Edit</button>
+                                 <button onClick={() => handleDeleteTeam(team.id)} className="cyber-button" style={{ padding: '4px 10px', fontSize: '0.7rem', borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>Delete</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
             </div>
@@ -398,7 +429,7 @@ export default function AdminDashboard() {
 
           {activeTab === 'tasks' && (
              <div className="glass-panel animate-slide-up" style={{ padding: '30px' }}>
-                <h3 className="neon-text-blue" style={{ marginBottom: '20px' }}>Task Masterlist</h3>
+                <h3 className="neon-text-blue" style={{ marginBottom: '20px' }}>Directive Masterlist</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
                   {[
                     { id: 1, title: 'Akinator Game', points: 100, status: 'Locked' },
@@ -418,7 +449,7 @@ export default function AdminDashboard() {
                   ].map(task => (
                     <div key={task.id} style={{ padding: '15px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--glass-border)', borderRadius: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>TASK {task.id < 10 ? `0${task.id}` : task.id}</span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>DIRECTIVE {task.id < 10 ? `0${task.id}` : task.id}</span>
                         <span style={{ color: 'var(--accent-purple)', fontSize: '0.8rem', fontWeight: 'bold' }}>{task.points} PTS</span>
                       </div>
                       <h4 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>{task.title}</h4>
@@ -439,11 +470,16 @@ export default function AdminDashboard() {
                   
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>SELECT TEAM</label>
-                    <select className="glow-border-blue" style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.5)', color: 'white', borderRadius: '4px' }}>
-                      <option>Team 01</option>
-                      <option>Team 02</option>
-                      <option>Team 03</option>
-                      <option>Team 04</option>
+                    <select 
+                      className="glow-border-blue" 
+                      style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.5)', color: 'white', borderRadius: '4px' }}
+                      value={selectedTeamForScore}
+                      onChange={(e) => setSelectedTeamForScore(e.target.value)}
+                    >
+                      <option value="">-- Choose a Team --</option>
+                      {teams.map(t => (
+                        <option key={t.id} value={t.id}>{t.name} (Current: {t.score})</option>
+                      ))}
                     </select>
                   </div>
 
@@ -451,7 +487,7 @@ export default function AdminDashboard() {
                     <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>QUICK ADD</label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       {[5, 10, 20, 50, 100].map(pts => (
-                        <button key={pts} className="cyber-button" style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>+{pts}</button>
+                        <button key={pts} onClick={() => handleQuickScore(pts)} className="cyber-button" style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>+{pts}</button>
                       ))}
                     </div>
                   </div>
@@ -460,7 +496,7 @@ export default function AdminDashboard() {
                     <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>QUICK DEDUCT</label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       {[5, 10, 20].map(pts => (
-                        <button key={pts} className="cyber-button" style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>-{pts}</button>
+                        <button key={pts} onClick={() => handleQuickScore(-pts)} className="cyber-button" style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>-{pts}</button>
                       ))}
                     </div>
                   </div>
@@ -524,7 +560,7 @@ export default function AdminDashboard() {
         </div>
         
         {/* Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ flex: '1 1 350px', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           
           <LeaderboardPreview teams={teams} />

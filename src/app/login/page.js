@@ -27,7 +27,7 @@ export default function Login() {
       if (baseTeamCode) {
         router.push(`/team?id=${encodeURIComponent(baseTeamCode)}&role=${role}`);
       } else {
-        alert('Please enter a team code');
+        alert('Please enter a valid mission code');
         setIsLoading(false);
       }
     }, 500);
@@ -35,26 +35,26 @@ export default function Login() {
 
   return (
     <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-      <div className="glass-panel" style={{ padding: '40px', width: '100%', maxWidth: '400px' }}>
-        <h2 className="neon-text-blue" style={{ textAlign: 'center', marginBottom: '20px' }}>System Access</h2>
+      <div className="glass-panel" style={{ padding: '40px', width: '100%', maxWidth: '400px', background: 'rgba(15, 12, 35, 0.85)' }}>
+        <h2 className="neon-text-blue" style={{ textAlign: 'center', marginBottom: '20px', fontFamily: 'var(--font-mono)' }}>Starfleet Access</h2>
         
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>TEAM CODE</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>MISSION CODE</label>
             <input 
               type="text" 
               value={teamCode}
               onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
               className="glow-border-blue"
-              placeholder="e.g. A7X9Q2"
+              placeholder="e.g. ORION-7"
               style={{
                 width: '100%',
                 padding: '12px',
-                background: 'rgba(0,0,0,0.5)',
+                background: 'rgba(5, 2, 15, 0.8)',
                 border: '1px solid var(--glass-border)',
                 borderRadius: '4px',
-                color: 'white',
+                color: 'var(--text-primary)',
                 fontFamily: 'var(--font-mono)',
                 textTransform: 'uppercase',
                 letterSpacing: '2px'
@@ -64,7 +64,7 @@ export default function Login() {
           </div>
           
           <button type="submit" className="cyber-button" style={{ marginTop: '20px' }} disabled={isLoading}>
-            {isLoading ? 'Connecting...' : 'Initialize Connection'}
+            {isLoading ? 'Calibrating Warp Drive...' : 'Launch Mission'}
           </button>
         </form>
       </div>

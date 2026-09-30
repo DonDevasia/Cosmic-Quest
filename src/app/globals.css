@@ -1,27 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;700&display=swap');
 
 :root {
-  /* Core Colors */
-  --bg-color: #050505;
-  --bg-surface: rgba(20, 20, 25, 0.7);
-  --bg-surface-light: rgba(40, 40, 50, 0.8);
-  --text-primary: #f0f0f5;
-  --text-secondary: #a0a0b0;
+  /* Core Colors - Deep Space Theme */
+  --bg-color: #03020b; /* Deep Void */
+  --bg-surface: rgba(15, 12, 35, 0.75); /* Nebula Glass */
+  --bg-surface-light: rgba(25, 20, 50, 0.85);
+  --text-primary: #e2e8f0; /* Starlight Silver */
+  --text-secondary: #8c9bb4; /* Distant Star Blue */
   
-  /* Accents */
-  --accent-blue: #00f0ff;
-  --accent-purple: #9d4edd;
-  --accent-cyan: #00b4d8;
-  --accent-green: #39ff14;
-  --accent-red: #ff003c;
+  /* Accents mapped to Space Treasure Hunt */
+  --accent-blue: #00f5ff; /* Plasma Cyan */
+  --accent-purple: #9d4edd; /* Deep Nebula Purple */
+  --accent-cyan: #ffaa00; /* Supernova Gold (Primary Treasure Color) */
+  --accent-green: #00ffaa; /* Alien Green (Success) */
+  --accent-red: #ff3366; /* Red Dwarf (Error) */
   
-  /* Glassmorphism */
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  /* Space Panel Effects */
+  --glass-border: rgba(0, 245, 255, 0.15);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9), 0 0 15px rgba(157, 78, 221, 0.1);
   
   /* Typography */
-  --font-main: 'Outfit', sans-serif;
-  --font-mono: 'Space Grotesk', monospace;
+  --font-main: 'Rajdhani', sans-serif;
+  --font-mono: 'Space Grotesk', sans-serif;
 }
 
 * {
@@ -35,79 +35,103 @@ body {
   color: var(--text-primary);
   font-family: var(--font-main);
   background-image: 
-    radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.05), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(157, 78, 221, 0.05), transparent 25%);
+    radial-gradient(circle at 20% 40%, rgba(157, 78, 221, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(0, 245, 255, 0.05), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 170, 0, 0.03), transparent 60%);
   background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Base Utility Classes used globally */
+/* Base Utility Classes */
 .glass-panel {
   background: var(--bg-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: 8px; /* Slightly rounded for sci-fi tech */
   box-shadow: var(--glass-shadow);
+  position: relative;
 }
 
+/* Subtle tech grid inside panels */
+.glass-panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Text overrides */
 .neon-text-blue {
   color: var(--accent-blue);
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  font-family: var(--font-mono);
+  text-shadow: 0 0 10px rgba(0, 245, 255, 0.5), 0 0 20px rgba(0, 245, 255, 0.3);
+  letter-spacing: 2px;
 }
 
 .neon-text-purple {
   color: var(--accent-purple);
-  text-shadow: 0 0 8px rgba(157, 78, 221, 0.5);
+  font-family: var(--font-mono);
+  text-shadow: 0 0 10px rgba(157, 78, 221, 0.5), 0 0 20px rgba(157, 78, 221, 0.3);
+  letter-spacing: 2px;
 }
 
 .glow-border-blue {
   border: 1px solid var(--accent-blue);
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.3), inset 0 0 8px rgba(0, 245, 255, 0.1);
 }
 
 .glow-border-purple {
   border: 1px solid var(--accent-purple);
-  box-shadow: 0 0 10px rgba(157, 78, 221, 0.3), inset 0 0 10px rgba(157, 78, 221, 0.1);
+  box-shadow: 0 0 8px rgba(157, 78, 221, 0.3), inset 0 0 8px rgba(157, 78, 221, 0.1);
 }
 
-/* Buttons */
+/* Space Buttons */
 .cyber-button {
-  background: linear-gradient(45deg, rgba(0, 240, 255, 0.1), rgba(157, 78, 221, 0.1));
+  background: linear-gradient(135deg, rgba(15, 12, 35, 0.9), rgba(25, 20, 50, 1));
   border: 1px solid var(--accent-blue);
-  color: var(--text-primary);
-  padding: 12px 24px;
-  border-radius: 8px;
+  color: var(--accent-blue);
+  padding: 10px 20px;
+  border-radius: 4px;
   font-family: var(--font-mono);
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: uppercase;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 245, 255, 0.1);
 }
 
 .cyber-button:hover {
-  background: linear-gradient(45deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+  background: linear-gradient(135deg, rgba(25, 20, 50, 0.9), rgba(45, 30, 80, 1));
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.5), inset 0 0 10px rgba(0, 245, 255, 0.2);
   transform: translateY(-2px);
+  color: #fff;
+  border-color: #fff;
 }
 
 .cyber-button:active {
   transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(0, 245, 255, 0.4);
 }
 
 /* Animations */
 @keyframes pulse {
   0% { opacity: 0.8; }
-  50% { opacity: 1; text-shadow: 0 0 15px var(--accent-blue); }
+  50% { opacity: 1; text-shadow: 0 0 15px rgba(255, 170, 0, 0.6); }
   100% { opacity: 0.8; }
 }
 
 .animate-pulse {
-  animation: pulse 2s infinite;
+  animation: pulse 2.5s infinite ease-in-out;
 }
 
 @keyframes slideUp {
@@ -116,7 +140,7 @@ body {
 }
 
 .animate-slide-up {
-  animation: slideUp 0.5s ease forwards;
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Layout Utilities */
@@ -128,7 +152,8 @@ body {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-color);
@@ -138,5 +163,5 @@ body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-blue);
+  background: var(--accent-cyan);
 }

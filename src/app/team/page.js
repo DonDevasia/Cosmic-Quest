@@ -10,6 +10,17 @@ import ObjectScannerTask from '@/components/ObjectScannerTask';
 import DictionaryTask from '@/components/DictionaryTask';
 
 
+function getRequiredRole(teamId, taskId) {
+  const combined = `${teamId}-${taskId}`;
+  let hash = 0;
+  for (let i = 0; i < combined.length; i++) {
+    hash = (hash << 5) - hash + combined.charCodeAt(i);
+    hash |= 0;
+  }
+  const roles = ['leader', 'player2', 'player3', 'player4'];
+  return roles[Math.abs(hash) % roles.length];
+}
+
 function TeamDashboardContent() {
   const searchParams = useSearchParams();
   const teamCode = searchParams.get('id'); // Using team_code passed from login
@@ -91,6 +102,13 @@ function TeamDashboardContent() {
       };
       // We assume a temporary default puzzle time of 180s (3 minutes) until later configured in DB
       taskData.puzzle_time_seconds = assignment.tasks.puzzle_time_seconds || 180;
+      // Calculate random assigned role for this task and team combo
+      if (taskData.title === 'Phase 2 - Final Destination') {
+        taskData.required_role = 'all';
+      } else {
+        taskData.required_role = getRequiredRole(assignment.team_id, assignment.task_id);
+      }
+      
       setCurrentTask(taskData);
       
       // Calculate remaining time
@@ -265,7 +283,7 @@ function TeamDashboardContent() {
   };
 
   if (loading) {
-    return <div className="container" style={{ textAlign: 'center', marginTop: '100px' }}><div className="neon-text-blue animate-pulse">Establishing Secure Connection...</div></div>;
+    return <div className="container" style={{ textAlign: 'center', marginTop: '100px' }}><div className="neon-text-blue animate-pulse">Calibrating Navigational Charts...</div></div>;
   }
 
   if (!team) {
@@ -274,16 +292,16 @@ function TeamDashboardContent() {
 
   return (
     <div className="container">
-      <Navbar title={`${team.team_name}`} subtitle="Mission Control" />
+      <Navbar title={`${team.team_name}`} subtitle="Mission Interface" />
       
       {!isGameStarted ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: '20px' }}>
           <div className="animate-pulse" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid var(--accent-cyan)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
-          <h1 className="neon-text-blue" style={{ fontSize: '3rem', textAlign: 'center' }}>WAITING FOR GAMES TO START</h1>
-          <p className="text-secondary" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Please wait for the Admin to initialize the global event...</p>
+          <h1 className="neon-text-blue" style={{ fontSize: '3rem', textAlign: 'center' }}>WAITING FOR LAUNCH SEQUENCE</h1>
+          <p className="text-secondary" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Please wait for Fleet Command to initiate the cosmic voyage...</p>
           
           <div style={{ background: 'rgba(0,0,0,0.6)', padding: '20px', borderRadius: '8px', border: '1px solid var(--glass-border)', minWidth: '300px' }}>
-            <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px', textAlign: 'center' }}>TEAM LOBBY</h3>
+            <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px', textAlign: 'center' }}>STARSHIP CREW</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {['leader', 'player2', 'player3', 'player4'].map(r => (
                 <li key={r} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
@@ -304,7 +322,7 @@ function TeamDashboardContent() {
           
           {/* Current Task & Timer */}
           <div className="glass-panel animate-slide-up" style={{ padding: '40px', textAlign: 'center', background: 'rgba(0, 240, 255, 0.05)' }}>
-            <p className="text-secondary" style={{ marginBottom: '10px' }}>CURRENT MISSION</p>
+            <p className="text-secondary" style={{ marginBottom: '10px' }}>SECTOR DIRECTIVE</p>
             {currentTask ? (
               <>
                 <h2 className="neon-text-blue" style={{ fontSize: '2.5rem', marginBottom: '20px' }}>{currentTask.title}</h2>
@@ -317,7 +335,7 @@ function TeamDashboardContent() {
                       {formatTime(masterTimeLeft)}
                     </div>
                     <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
-                      MISSION TIME LIMIT
+                      DIRECTIVE TIME LIMIT
                     </p>
                   </div>
 
@@ -345,17 +363,19 @@ function TeamDashboardContent() {
                     <h3 style={{ color: 'var(--accent-purple)', marginBottom: '10px' }}>TRAVEL TO VENUE</h3>
                     <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '20px' }}>"{currentTask.venue_hint}"</p>
                     
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>Scan the Venue QR code at the location to unlock the puzzle.</p>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>
+                      {currentTask.title.includes('Phase 2 - QR') ? 'Scan the QR code at the location to advance.' : 'Scan the Venue QR code at the location to unlock the puzzle.'}
+                    </p>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <QRScannerTask onSuccess={startTaskFromQR} />
+                      <QRScannerTask onSuccess={currentTask.title.includes('Phase 2 - QR') ? submitKeywordToAPI : startTaskFromQR} />
                       {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '1.1rem', marginTop: '15px', fontWeight: 'bold' }}>{submitError}</p>}
                     </div>
                   </div>
                 ) : currentTask.status === 'Submitted' ? (
                   <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-blue)', borderRadius: '8px', textAlign: 'center' }}>
                     <div className="animate-pulse" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px solid var(--accent-blue)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite', margin: '0 auto 20px auto' }}></div>
-                    <h3 style={{ color: 'var(--accent-blue)', marginBottom: '10px' }}>UPLOADING TO MAINFRAME...</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Awaiting manual verification from the Administrator.</p>
+                    <h3 style={{ color: 'var(--accent-blue)', marginBottom: '10px' }}>TRANSMITTING TO STARFLEET...</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>Awaiting verification from Fleet Command.</p>
                   </div>
                 ) : currentTask.status === 'Completed' ? (
                   <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-green)', borderRadius: '8px', textAlign: 'center' }}>
@@ -377,7 +397,7 @@ function TeamDashboardContent() {
                     {/* Task Submission Form for Tongue Twister */}
                     {currentTask.title === 'Tongue Twister' && (
                       <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
-                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>TONGUE TWISTER TERMINAL</h3>
+                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>VOCAL OVERRIDE MODULE</h3>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Say the tongue twister perfectly to the Admin. Enter the completion code they provide once you succeed.</p>
                         <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                           <input 
@@ -398,7 +418,7 @@ function TeamDashboardContent() {
                     {/* Task Submission Form for Thugwar */}
                     {currentTask.title === 'Thugwar' && (
                       <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
-                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>ENTER DECRYPTION KEYWORD</h3>
+                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>ENTER AUTHORIZATION CODE</h3>
                         <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                           <input 
                             type="text" 
@@ -409,7 +429,7 @@ function TeamDashboardContent() {
                           />
                           {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
                           <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px' }}>
-                            INITIATE TRANSFER
+                            AUTHORIZE TRANSFER
                           </button>
                         </form>
                       </div>
@@ -436,7 +456,7 @@ function TeamDashboardContent() {
                     {/* Morse Code Game UI */}
                     {currentTask.title === 'Morse Code' && (
                       <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-green)', borderRadius: '8px', textAlign: 'center' }}>
-                        <h3 style={{ color: 'var(--accent-green)', marginBottom: '15px' }}>INTERCEPTED TRANSMISSION</h3>
+                        <h3 style={{ color: 'var(--accent-green)', marginBottom: '15px' }}>ALIEN TRANSMISSION</h3>
                         
                         <div style={{ padding: '20px', background: 'rgba(0, 255, 136, 0.1)', borderRadius: '6px', marginBottom: '20px', letterSpacing: '4px', fontSize: '2rem', color: 'white', fontFamily: 'var(--font-mono)' }}>
                           --. .-. --- ..- -. -..
@@ -447,7 +467,7 @@ function TeamDashboardContent() {
                             type="text" 
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value.toUpperCase())}
-                            placeholder="DECODED MESSAGE..." 
+                            placeholder="DECODED SIGNAL..." 
                             style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--accent-green)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
                           />
                           {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
@@ -471,7 +491,7 @@ function TeamDashboardContent() {
                     {/* Dictionary UI */}
                     {currentTask.title === 'Dictionary Game' && (
                       <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
-                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>DICTIONARY TERMINAL</h3>
+                        <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>DATA ARCHIVE QUERY</h3>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Complete the physical dictionary task. Enter the completion code given by the Admin once you succeed.</p>
                         <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                           <input 
@@ -531,44 +551,13 @@ function TeamDashboardContent() {
                       </div>
                     )}
 
-                    {/* Phase 2 QR Tasks */}
-                    {(currentTask.title === 'Phase 2 - QR 1' || currentTask.title === 'Phase 2 - QR 2' || currentTask.title === 'Phase 2 - QR 3') && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-blue)', borderRadius: '8px' }}>
-                        <h3 className="neon-text-blue" style={{ marginBottom: '15px', textTransform: 'uppercase' }}>{currentTask.title}</h3>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Find the QR code at the given location. You can scan it or enter the code manually.</p>
-                        
-                        <div style={{ width: '100%', marginBottom: '20px' }}>
-                          <QRScannerTask onSuccess={submitKeywordToAPI} />
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', margin: '15px 0' }}>
-                          <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
-                          <span style={{ color: 'var(--text-secondary)' }}>OR</span>
-                          <div style={{ flex: 1, height: '1px', background: 'var(--glass-border)' }}></div>
-                        </div>
-
-                        <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', width: '100%' }}>
-                          <input 
-                            type="text" 
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value.toUpperCase())}
-                            placeholder="ENTER CODE MANUALLY..." 
-                            style={{ width: '100%', maxWidth: '300px', padding: '12px', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--accent-blue)', color: 'white', textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}
-                          />
-                          {submitError && <p style={{ color: 'var(--accent-red)', fontSize: '0.9rem', marginTop: '5px' }}>{submitError}</p>}
-                          <button type="submit" className="cyber-button" style={{ marginTop: '10px', width: '100%', maxWidth: '300px' }}>
-                            VERIFY CODE
-                          </button>
-                        </form>
-                      </div>
-                    )}
-
+                    {/* Phase 2 QR Tasks are now handled directly from the Assigned screen, so we don't need their In Progress UI anymore, except for Final Destination */}
                     {/* Phase 2 Final Destination */}
                     {currentTask.title === 'Phase 2 - Final Destination' && (
                       <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-purple)', borderRadius: '8px', textAlign: 'center' }}>
-                        <h3 className="neon-text-purple" style={{ marginBottom: '15px' }}>FINAL DESTINATION</h3>
+                        <h3 className="neon-text-purple" style={{ marginBottom: '15px' }}>FINAL DESTINATION: CUPSTACKING</h3>
                         <p style={{ color: 'white', fontSize: '1.2rem', marginBottom: '20px' }}>
-                          Head to the final location! The first team to arrive and enter the final keyword wins!
+                          Head to the final location! Perform the cupstacking challenge. The first team to complete it and enter the final keyword wins!
                         </p>
                         <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                           <input 
@@ -595,7 +584,7 @@ function TeamDashboardContent() {
                 )}
               </>
             ) : (
-              <h2 className="neon-text-blue animate-pulse" style={{ fontSize: '2rem', marginBottom: '20px' }}>DECRYPTING INSTRUCTIONS...</h2>
+              <h2 className="neon-text-blue animate-pulse" style={{ fontSize: '2rem', marginBottom: '20px' }}>DECRYPTING COORDINATES...</h2>
             )}
           </div>
           
@@ -604,7 +593,7 @@ function TeamDashboardContent() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Team Roster */}
             <div className="glass-panel animate-slide-up" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <h3 className="neon-text-blue" style={{ marginBottom: '5px' }}>Team Roster</h3>
+              <h3 className="neon-text-blue" style={{ marginBottom: '5px' }}>Starship Crew</h3>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(255, 0, 60, 0.05)', border: '1px solid var(--accent-red)', borderRadius: '6px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>A</div>
@@ -643,7 +632,7 @@ function TeamDashboardContent() {
             {/* Campaign Progress */}
             <div className="glass-panel animate-slide-up" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                <span>Missions Completed</span>
+                <span>Directives Accomplished</span>
                 <span className="neon-text-blue" style={{ fontWeight: 'bold' }}>0 / 10</span>
               </div>
               <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -660,7 +649,7 @@ function TeamDashboardContent() {
 
 export default function TeamDashboard() {
   return (
-    <Suspense fallback={<div className="container" style={{ textAlign: 'center', marginTop: '100px' }}><div className="neon-text-blue">Loading Mission Control...</div></div>}>
+    <Suspense fallback={<div className="container" style={{ textAlign: 'center', marginTop: '100px' }}><div className="neon-text-blue">Initializing Mission Interface...</div></div>}>
       <TeamDashboardContent />
     </Suspense>
   );
