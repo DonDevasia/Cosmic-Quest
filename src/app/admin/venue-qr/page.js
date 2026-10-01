@@ -14,6 +14,12 @@ const VENUES = [
   { task: 10, title: 'TANGRAM', code: 'VENUE_10', hint: 'J' }
 ];
 
+const IN_GAME_QRS = [
+  { title: 'Task 2: QR Scanner (Hidden Code)', code: 'THE_ARCHITECT', hint: 'Hide this somewhere for players to scan during Task 2' },
+  { title: 'Phase 2 - Location 1 QR', code: 'LOC1_CODE', hint: 'Hide this at Phase 2 Location 1' },
+  { title: 'Phase 2 - Location 2 QR', code: 'LOC2_CODE', hint: 'Hide this at Phase 2 Location 2' }
+];
+
 export default function VenueQrGenerator() {
   return (
     <div style={{ backgroundColor: 'white', color: 'black', padding: '20px', minHeight: '100vh', fontFamily: 'sans-serif' }}>
@@ -37,6 +43,24 @@ export default function VenueQrGenerator() {
             <span style={{ marginTop: '15px', fontSize: '14px', fontWeight: 'bold' }}>Scan to Start Mission</span>
           </div>
         ))}
+      </div>
+
+      <div style={{ marginTop: '80px', paddingTop: '40px', borderTop: '4px solid #000' }}>
+        <h1 style={{ marginBottom: '20px' }}>In-Game Hidden QR Codes</h1>
+        <p className="print-hide" style={{ marginBottom: '30px' }}>
+          <strong>Admin Note:</strong> These are the hidden QR codes that players must find and scan to COMPLETE specific tasks.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', justifyContent: 'center' }}>
+          {IN_GAME_QRS.map((v, index) => (
+            <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', breakInside: 'avoid', border: '2px dashed #ff3366', padding: '20px', borderRadius: '10px' }}>
+              <h2 style={{ margin: '0 0 10px 0', textAlign: 'center', color: '#ff3366' }}>{v.title}</h2>
+              <p style={{ fontStyle: 'italic', color: '#555', textAlign: 'center', marginBottom: '15px' }}>{v.hint}</p>
+              <QRCodeSVG value={v.code} size={200} />
+              <span style={{ marginTop: '15px', fontSize: '14px', fontWeight: 'bold' }}>Scan to Complete Mission</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <style jsx global>{`
