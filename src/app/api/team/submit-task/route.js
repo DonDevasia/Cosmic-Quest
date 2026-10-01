@@ -37,8 +37,17 @@ export async function POST(request) {
     if (!isExpired && !adminOverride) {
       const dbKeyword = task.completion_keyword ? task.completion_keyword.trim().toUpperCase() : '';
 
-      if (dbKeyword && cleanKeyword !== dbKeyword) {
-        return NextResponse.json({ success: false, message: 'Access Denied: Invalid Keyword' }, { status: 400 });
+      if (task.task_number === 9) {
+        // Custom validation for Bottle Counting
+        const count = parseInt(cleanKeyword, 10);
+        if (isNaN(count) || count < 320) {
+          return NextResponse.json({ success: false, message: 'Incorrect bottle count! Try again.' }, { status: 400 });
+        }
+      } else {
+        // Standard keyword validation
+        if (dbKeyword && cleanKeyword !== dbKeyword) {
+          return NextResponse.json({ success: false, message: 'Access Denied: Invalid Keyword' }, { status: 400 });
+        }
       }
     }
 
