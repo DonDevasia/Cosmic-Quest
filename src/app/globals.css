@@ -279,6 +279,11 @@ body {
   100% { transform: translate(-20vw, -120vh) rotate(90deg); opacity: 0; }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 
 /* Mobile Responsive Overrides */
 @media screen and (max-width: 768px) {
