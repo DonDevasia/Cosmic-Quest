@@ -7,20 +7,14 @@ import { useState, useRef, useEffect } from 'react';
 const SCALE = 50;
 
 const INITIAL_PIECES = [
-  // Large Triangle 1 (color: light cyan)
-  { id: 1, type: 'large-tri-1', points: '0,0 -100,-100 100,-100', color: 'rgba(150, 240, 255, 0.9)', x: 100, y: 350, rotation: 0 },
-  // Large Triangle 2 (color: light blue)
-  { id: 2, type: 'large-tri-2', points: '0,0 -100,100 -100,-100', color: 'rgba(120, 180, 255, 0.9)', x: 250, y: 350, rotation: 0 },
-  // Medium Triangle (color: light purple)
-  { id: 3, type: 'med-tri', points: '0,0 -70.7,-70.7 0,-141.4', color: 'rgba(200, 150, 255, 0.9)', x: 400, y: 350, rotation: 0 },
-  // Small Triangle 1 (color: light magenta)
-  { id: 4, type: 'small-tri-1', points: '0,0 -50,50 50,50', color: 'rgba(255, 150, 255, 0.9)', x: 100, y: 450, rotation: 0 },
-  // Small Triangle 2 (color: light pink)
-  { id: 5, type: 'small-tri-2', points: '0,0 50,-50 50,50', color: 'rgba(255, 180, 200, 0.9)', x: 200, y: 450, rotation: 0 },
-  // Square (color: light yellow)
-  { id: 6, type: 'square', points: '0,50 -50,0 0,-50 50,0', color: 'rgba(255, 230, 150, 0.9)', x: 300, y: 450, rotation: 0 },
-  // Parallelogram (color: light green)
-  { id: 7, type: 'parallelogram', points: '-25,25 -75,-25 25,-25 75,25', color: 'rgba(150, 255, 180, 0.9)', x: 450, y: 450, rotation: 0 },
+  // Top Triangle
+  { id: 1, type: 'tri-1', points: '0,0 100,-100 -100,-100', color: 'rgba(150, 240, 255, 0.9)', x: 150, y: 400, rotation: 90 },
+  // Bottom Triangle
+  { id: 2, type: 'tri-2', points: '0,0 100,100 -100,100', color: 'rgba(120, 180, 255, 0.9)', x: 300, y: 400, rotation: 180 },
+  // Right Triangle
+  { id: 3, type: 'tri-3', points: '0,0 100,100 100,-100', color: 'rgba(200, 150, 255, 0.9)', x: 450, y: 400, rotation: -90 },
+  // Left Triangle
+  { id: 4, type: 'tri-4', points: '0,0 -100,100 -100,-100', color: 'rgba(255, 150, 255, 0.9)', x: 300, y: 500, rotation: 0 },
 ];
 
 export default function TangramTask({ onSuccess }) {
@@ -72,7 +66,7 @@ export default function TangramTask({ onSuccess }) {
     <div style={{ marginTop: '20px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px', textAlign: 'center' }}>
       <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>TANGRAM ALIGNMENT PROTOCOL</h3>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-        Drag the pieces to form a perfect Square. Double-click or double-tap a piece to rotate it.
+        Drag the 4 pieces to form a perfect Square inside the target box. Double-tap a piece to rotate it.
       </p>
 
       <div style={{ 
