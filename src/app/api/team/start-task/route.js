@@ -13,7 +13,7 @@ export async function POST(request) {
     // 1. Verify the venue keyword against the tasks table
     const { data: task, error: taskErr } = await supabase
       .from('tasks')
-      .select('start_keyword')
+      .select('start_keyword, task_number')
       .eq('id', taskId)
       .single();
 
@@ -28,12 +28,20 @@ export async function POST(request) {
     }
 
     // 2. Mark the current task as In Progress in team_tasks and start timer
+    const isPhase1 = task.task_number <= 10;
+    
+    const updateData = {
+      status: 'In Progress',
+      started_at: new Date().toISOString()
+    };
+    
+    if (isPhase1) {
+      updateData.points_awarded = 100;
+    }
+
     const { error: completeErr } = await supabase
       .from('team_tasks')
-      .update({
-        status: 'In Progress',
-        started_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('team_id', teamId)
       .eq('task_id', taskId)
       .eq('status', 'Assigned'); // Only update if it's currently Assigned
@@ -42,7 +50,23 @@ export async function POST(request) {
       throw completeErr;
     }
 
-    return NextResponse.json({ success: true, message: 'Venue Verified. Task Started.' });
+    if (isPhase1) {
+      // Update team total score directly
+      const { data: teamData, error: teamFetchErr } = await supabase
+        .from('teams')
+        .select('total_score')
+        .eq('id', teamId)
+        .single();
+        
+      if (!teamFetchErr && teamData) {
+        await supabase
+          .from('teams')
+          .update({ total_score: teamData.total_score + 100 })
+          .eq('id', teamId);
+      }
+    }
+
+    return NextResponse.json({ success: true, message: 'Venue Verified. Task Started. +100 Points Awarded!' });
 
   } catch (error) {
     console.error('Start Task Error:', error);

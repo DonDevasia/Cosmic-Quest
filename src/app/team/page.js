@@ -20,7 +20,6 @@ function TeamDashboardContent() {
   const [currentTask, setCurrentTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [masterTimeLeft, setMasterTimeLeft] = useState(480); // 8 mins max
-  const [puzzleTimeLeft, setPuzzleTimeLeft] = useState(null);
   const [keyword, setKeyword] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
@@ -100,27 +99,17 @@ function TeamDashboardContent() {
         admin_feedback: assignment.admin_feedback,
         time_limit_seconds: assignment.tasks.time_limit_seconds || 480
       };
-      // We assume a temporary default puzzle time of 180s (3 minutes) until later configured in DB
-      taskData.puzzle_time_seconds = assignment.tasks.puzzle_time_seconds || 180;
       
       setCurrentTask(taskData);
       
       // Calculate remaining time
       let masterRemaining = 0;
-      let puzzleRemaining = null;
-
       if (assignment.assigned_at) {
         const elapsed = Math.floor((Date.now() - new Date(assignment.assigned_at).getTime()) / 1000);
         masterRemaining = Math.max(0, taskData.time_limit_seconds - elapsed);
       }
       
-      if (assignment.started_at) {
-        const elapsed = Math.floor((Date.now() - new Date(assignment.started_at).getTime()) / 1000);
-        puzzleRemaining = Math.max(0, taskData.puzzle_time_seconds - elapsed);
-      }
-      
       setMasterTimeLeft(masterRemaining);
-      setPuzzleTimeLeft(puzzleRemaining);
     }
   };
 
@@ -152,28 +141,15 @@ function TeamDashboardContent() {
     if (currentTask && masterTimeLeft > 0) {
       timerId = setInterval(() => {
         let newMaster = 0;
-        let newPuzzle = null;
         
         if (currentTask.assigned_at) {
           const masterElapsed = Math.floor((Date.now() - new Date(currentTask.assigned_at).getTime()) / 1000);
           newMaster = Math.max(0, currentTask.time_limit_seconds - masterElapsed);
         }
-        
-        if (currentTask.started_at) {
-          const puzzleElapsed = Math.floor((Date.now() - new Date(currentTask.started_at).getTime()) / 1000);
-          newPuzzle = Math.max(0, currentTask.puzzle_time_seconds - puzzleElapsed);
-        }
 
         setMasterTimeLeft(newMaster);
-        setPuzzleTimeLeft(newPuzzle);
 
-        const isTaskFinished = currentTask.status === 'Completed' || currentTask.status === 'Submitted' || currentTask.status === 'Failed';
         const isPhase2 = currentTask.task_number > 10;
-        const puzzleExpired = !isTaskFinished && newPuzzle !== null && newPuzzle <= 0;
-
-        if (puzzleExpired && !isPhase2) {
-          handlePuzzleExpired();
-        }
 
         if (newMaster <= 0 && !isPhase2) {
           clearInterval(timerId);
@@ -182,20 +158,7 @@ function TeamDashboardContent() {
       }, 1000);
     }
     return () => clearInterval(timerId);
-  }, [currentTask, masterTimeLeft, puzzleTimeLeft]);
-
-  const handlePuzzleExpired = async () => {
-    try {
-      await fetch('/api/team/submit-task', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teamId: team.id, taskId: currentTask.id, isPuzzleExpired: true, keyword: '' })
-      });
-      fetchTeamData();
-    } catch (err) {
-      console.error('Failed to report puzzle expiration');
-    }
-  };
+  }, [currentTask, masterTimeLeft]);
 
   const handleTaskExpired = async () => {
     try {
@@ -311,18 +274,6 @@ function TeamDashboardContent() {
                         DIRECTIVE TIME LIMIT
                       </p>
                     </div>
-
-                    {/* Puzzle Timer */}
-                    {currentTask.started_at && puzzleTimeLeft !== null && (
-                      <div>
-                        <div className="neon-text-blue" style={{ fontSize: '4rem', fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: puzzleTimeLeft === 0 ? 'var(--accent-red)' : '' }}>
-                          {formatTime(puzzleTimeLeft)}
-                        </div>
-                        <p className="text-secondary" style={{ marginTop: '10px', marginBottom: '20px', fontSize: '0.9rem' }}>
-                          PUZZLE TIME LIMIT
-                        </p>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -370,7 +321,7 @@ function TeamDashboardContent() {
                 ) : currentTask.status === 'Failed' ? (
                   <div style={{ padding: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--accent-red)', borderRadius: '8px', textAlign: 'center' }}>
                     <h3 style={{ color: 'var(--accent-red)', marginBottom: '10px', fontSize: '2rem' }}>TASK FAILED</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>You failed to solve the puzzle in time. Please wait for the master timer to expire to receive your next mission.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>You failed to solve the puzzle. Please wait for the master timer to expire to receive your next mission.</p>
                   </div>
                 ) : (
                   <>
@@ -479,9 +430,12 @@ function TeamDashboardContent() {
 
                     {/* Dictionary UI */}
                     {currentTask.title === 'Dictionary Game' && (
-                      <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px' }}>
+                      <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px', textAlign: 'center' }}>
                         <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>DATA ARCHIVE QUERY</h3>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px', textAlign: 'center' }}>Complete the physical dictionary task. Enter the completion code given by the Admin once you succeed.</p>
+                        <div style={{ padding: '20px', background: 'rgba(0, 240, 255, 0.1)', borderRadius: '6px', marginBottom: '20px', fontSize: '1.2rem', color: 'white', fontStyle: 'italic' }}>
+                          &quot;relating to the vast universe, the cosmos, or space outside of Earth&quot;
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '15px' }}>Enter the word that matches this definition.</p>
                         <form onSubmit={handleSubmitKeyword} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                           <input 
                             type="text" 

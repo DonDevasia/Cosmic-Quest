@@ -16,10 +16,10 @@ function shuffleArray(array) {
 
 export async function POST(request) {
   try {
-    const { teamId, taskId, keyword, isExpired, isPuzzleExpired } = await request.json();
+    const { teamId, taskId, keyword, isExpired } = await request.json();
     const cleanKeyword = keyword ? keyword.trim().toUpperCase() : '';
 
-    if (!teamId || !taskId || (!cleanKeyword && !isExpired && !isPuzzleExpired)) {
+    if (!teamId || !taskId || (!cleanKeyword && !isExpired)) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
@@ -56,22 +56,7 @@ export async function POST(request) {
 
     const wasAlreadyCompleted = currentAssignment.status === 'Completed';
 
-    if (isPuzzleExpired) {
-      if (wasAlreadyCompleted) {
-         return NextResponse.json({ success: true, message: 'Already completed before puzzle expired.' });
-      }
-      const { error: failErr } = await supabase
-        .from('team_tasks')
-        .update({
-          status: 'Failed',
-          points_awarded: 0
-        })
-        .eq('team_id', teamId)
-        .eq('task_id', taskId);
-      
-      if (failErr) throw failErr;
-      return NextResponse.json({ success: true, message: 'Puzzle Expired. Task Failed. Waiting for master timer.' });
-    }
+
 
     let shouldAssignNextTask = false;
 
@@ -94,8 +79,8 @@ export async function POST(request) {
 
         if (!countErr && previousWinners) {
           const completedCount = previousWinners.length;
-          // 1st gets 1000 (if base is 1000), 2nd gets 900, 3rd 800, etc. Minimum 100.
-          pointsToAward = Math.max(100, task.base_points - (completedCount * 100));
+          // 1st gets 9000, 2nd gets 8500, 3rd 8000, etc.
+          pointsToAward = Math.max(0, 9000 - (completedCount * 500));
         }
       }
 
@@ -107,7 +92,7 @@ export async function POST(request) {
           status: 'Completed',
           is_active: isPhase2 ? false : true,
           completed_at: new Date().toISOString(),
-          points_awarded: pointsToAward
+          points_awarded: (currentAssignment.points_awarded || 0) + pointsToAward
         })
         .eq('team_id', teamId)
         .eq('task_id', taskId);
