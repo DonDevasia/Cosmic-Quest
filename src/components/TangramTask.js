@@ -37,10 +37,11 @@ export default function TangramTask({ onSuccess }) {
   const handlePointerMove = (e) => {
     if (!draggingId || !svgRef.current) return;
     
-    // Get mouse position relative to SVG
-    const svgRect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - svgRect.left;
-    const y = e.clientY - svgRect.top;
+    // Get mouse position mapped to SVG coordinates
+    const CTM = svgRef.current.getScreenCTM();
+    if (!CTM) return;
+    const x = (e.clientX - CTM.e) / CTM.a;
+    const y = (e.clientY - CTM.f) / CTM.d;
 
     setPieces(prev => prev.map(p => 
       p.id === draggingId ? { ...p, x, y } : p
@@ -78,7 +79,7 @@ export default function TangramTask({ onSuccess }) {
         position: 'relative', 
         width: '100%', 
         maxWidth: '600px', 
-        height: '600px', 
+        aspectRatio: '1 / 1', 
         margin: '0 auto', 
         background: 'rgba(255,255,255,0.05)',
         border: '2px solid rgba(255,255,255,0.3)',
@@ -101,6 +102,7 @@ export default function TangramTask({ onSuccess }) {
 
         <svg 
           ref={svgRef}
+          viewBox="0 0 600 600"
           width="100%" 
           height="100%" 
           onPointerMove={handlePointerMove}
