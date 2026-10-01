@@ -25,22 +25,35 @@ export default function AdminDashboard() {
     const fetchTeams = async () => {
       const { data, error } = await supabase
         .from('teams')
-        .select('*')
+        .select(`
+          *,
+          team_tasks (
+            status,
+            is_active,
+            tasks ( title )
+          )
+        `)
         .order('total_score', { ascending: false });
         
       if (!error && data) {
-        const mapped = data.map((t, idx) => ({
-          id: t.id,
-          rank: idx + 1,
-          name: t.team_name,
-          score: t.total_score,
-          status: t.is_locked ? 'Locked' : 'Active',
-          code: t.team_code,
-          memberA: t.member_a,
-          memberB: t.member_b,
-          memberC: t.member_c,
-          memberD: t.member_d
-        }));
+        const mapped = data.map((t, idx) => {
+          const activeTask = t.team_tasks?.find(tt => tt.is_active);
+          const completedCount = t.team_tasks?.filter(tt => tt.status === 'Completed').length || 0;
+          return {
+            id: t.id,
+            rank: idx + 1,
+            name: t.team_name,
+            score: t.total_score,
+            status: t.is_locked ? 'Locked' : 'Active',
+            code: t.team_code,
+            memberA: t.member_a,
+            memberB: t.member_b,
+            memberC: t.member_c,
+            memberD: t.member_d,
+            currentDirective: activeTask?.tasks?.title || 'None',
+            completedTasks: completedCount
+          };
+        });
         setTeams(mapped);
       }
     };
@@ -465,6 +478,7 @@ export default function AdminDashboard() {
                         <th style={{ padding: '10px' }}>Login Code</th>
                         <th style={{ padding: '10px' }}>Score</th>
                         <th style={{ padding: '10px' }}>Current Directive</th>
+                        <th style={{ padding: '10px' }}>Completed</th>
                         <th style={{ padding: '10px' }}>Status</th>
                         <th style={{ padding: '10px' }}>Action</th>
                       </tr>
@@ -483,7 +497,8 @@ export default function AdminDashboard() {
                             <td style={{ padding: '10px', fontWeight: 'bold' }}>{team.name}</td>
                             <td style={{ padding: '10px', color: 'var(--accent-purple)', fontFamily: 'var(--font-mono)' }}>{team.code}</td>
                             <td style={{ padding: '10px', color: 'var(--accent-green)' }}><span className="meteor-icon">☄️</span>{team.score}</td>
-                            <td style={{ padding: '10px' }}>-</td>
+                            <td style={{ padding: '10px', color: 'var(--accent-cyan)' }}>{team.currentDirective}</td>
+                            <td style={{ padding: '10px', fontWeight: 'bold' }}>{team.completedTasks} / 14</td>
                             <td style={{ padding: '10px', color: team.status === 'Active' ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{team.status}</td>
                             <td style={{ padding: '10px' }}>
                               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
