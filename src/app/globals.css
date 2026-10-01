@@ -278,3 +278,22 @@ body {
   90% { opacity: 1; }
   100% { transform: translate(-20vw, -120vh) rotate(90deg); opacity: 0; }
 }
+
+
+/* Mobile Responsive Overrides */
+@media screen and (max-width: 768px) {
+  .container { padding: 12px; }
+  .glass-panel { padding: 20px !important; }
+  h1 { font-size: 2rem !important; }
+  h2 { font-size: 1.8rem !important; }
+  h3 { font-size: 1.3rem !important; }
+  .neon-text-blue { font-size: 1.8rem !important; }
+  .neon-text-purple { font-size: 2.5rem !important; }
+  input, button { max-width: 100% !important; }
+  .rocket, .astronaut { font-size: 2rem !important; }
+}
+
+@media screen and (max-width: 768px) {
+  nav.glass-panel { padding: 12px 16px !important; flex-wrap: wrap; gap: 12px; }
+  .cyber-button { padding: 8px 12px !important; font-size: 0.85rem !important; }
+}
