@@ -17,7 +17,9 @@ const VENUES = [
 const IN_GAME_QRS = [
   { title: 'Task 2: QR Scanner (Hidden Code)', code: 'THE_ARCHITECT', hint: 'Hide this somewhere for players to scan during Task 2' },
   { title: 'Phase 2 - Location 1 QR', code: 'LOC1_CODE', hint: 'Hide this at Phase 2 Location 1' },
-  { title: 'Phase 2 - Location 2 QR', code: 'LOC2_CODE', hint: 'Hide this at Phase 2 Location 2' }
+  { title: 'Phase 2 - Location 2 QR', code: 'LOC2_CODE', hint: 'Hide this at Phase 2 Location 2' },
+  { title: 'Phase 2 - Location 3 QR', code: 'LOC3_CODE', hint: 'Hide this at Phase 2 Location 3' },
+  { title: 'Final Destination QR (VICTORY)', code: 'VICTORY', hint: 'Hide this at the absolute Final Destination for the teams to scan and win' }
 ];
 
 export default function VenueQrGenerator() {
