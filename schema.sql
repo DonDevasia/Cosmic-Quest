@@ -91,13 +91,7 @@ INSERT INTO tasks (task_number, title, description, base_points, status, complet
 (1, 'Tongue Twister', 'Say the tongue twister perfectly without making a mistake', 850, 'Locked', 'HAHAHA', 'VENUE_01', 'I go forward, I go back, yet never leave my place'),
 (2, 'QR Scanner', 'Scan and decode the hidden QR codes', 550, 'Locked', 'THE_ARCHITECT', 'VENUE_02', 'To meet the master , Two steps, zero excuses, nine chances…
 Sounds like a strange combination, right? 👀'),
-(3, 'Thugwar', 'Compete in the Thugwar challenge', 400, 'Locked', '12223', 'VENUE_03', '         (0, 1)
-
-
-(-1, 0)     ?     (1, 0)
-
-            
-           (0, -1)'),
+(3, 'Thugwar', 'Compete in the Thugwar challenge', 400, 'Locked', '12223', 'VENUE_03', 'Call The fireforce to the CS Block'),
 (4, 'Object Scanner', 'Identify the correct objects', 1500, 'Locked', NULL, 'VENUE_04', 'carbon,helium,'),
 (5, 'Word Game', 'Solve the linguistic puzzles', 600, 'Locked', 'SPACE', 'VENUE_05', 'Oru tulli , pallatulli ,peru vellam'),
 (6, 'Convince Me', 'Convince your virtual ex-gf to patch up with you', 2500, 'Locked', 'ONE', 'VENUE_06', 'Machines have their secrets, but don''t look for them on the floor. Search where every step takes you closer'),
