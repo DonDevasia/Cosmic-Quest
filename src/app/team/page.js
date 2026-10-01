@@ -141,42 +141,57 @@ function TeamDashboardContent() {
   // Task Countdown Timer and Expiration
   useEffect(() => {
     let timerId;
-    if (currentTask && masterTimeLeft > 0) {
+    if (!currentTask || !team) return;
+
+    const isPhase2 = currentTask.task_number > 10;
+    let isSubmitting = false;
+
+    const checkAndHandleExpiration = async (timeLeft) => {
+      if (timeLeft <= 0 && !isPhase2 && !isSubmitting) {
+        isSubmitting = true;
+        if (timerId) clearInterval(timerId);
+        
+        try {
+          setShowExpiredMessage(true);
+          await fetch('/api/team/submit-task', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ teamId: team.id, taskId: currentTask.id, isExpired: true, keyword: '' })
+          });
+          setShowExpiredMessage(false);
+          fetchTeamData();
+        } catch (err) {
+          console.error('Failed to report master expiration');
+          isSubmitting = false; // allow retry
+        }
+      }
+    };
+
+    let initialMaster = 0;
+    if (currentTask.assigned_at) {
+      const elapsed = Math.floor((Date.now() - new Date(currentTask.assigned_at).getTime()) / 1000);
+      initialMaster = Math.max(0, currentTask.time_limit_seconds - elapsed);
+    }
+    
+    // Immediate check on mount/update
+    checkAndHandleExpiration(initialMaster);
+
+    if (initialMaster > 0) {
       timerId = setInterval(() => {
         let newMaster = 0;
-        
         if (currentTask.assigned_at) {
           const masterElapsed = Math.floor((Date.now() - new Date(currentTask.assigned_at).getTime()) / 1000);
           newMaster = Math.max(0, currentTask.time_limit_seconds - masterElapsed);
         }
-
         setMasterTimeLeft(newMaster);
-
-        const isPhase2 = currentTask.task_number > 10;
-
-        if (newMaster <= 0 && !isPhase2) {
-          clearInterval(timerId);
-          handleTaskExpired();
-        }
+        checkAndHandleExpiration(newMaster);
       }, 1000);
     }
-    return () => clearInterval(timerId);
-  }, [currentTask, masterTimeLeft]);
 
-  const handleTaskExpired = async () => {
-    try {
-      setShowExpiredMessage(true);
-      await fetch('/api/team/submit-task', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teamId: team.id, taskId: currentTask.id, isExpired: true, keyword: '' })
-      });
-      setShowExpiredMessage(false);
-      fetchTeamData();
-    } catch (err) {
-      console.error('Failed to report master expiration');
-    }
-  };
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [currentTask, team, fetchTeamData]);
 
   const startTaskFromQR = async (kw) => {
     setSubmitError('');
