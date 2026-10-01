@@ -288,7 +288,7 @@ export default function AdminDashboard() {
       alert('Please select a team first');
       return;
     }
-    if (!confirm('Are you sure you want to FORCE COMPLETE this team\\'s currently active task? This will award them base points and move them to the next task.')) {
+    if (!confirm("Are you sure you want to FORCE COMPLETE this team's currently active task? This will award them base points and move them to the next task.")) {
       return;
     }
 
