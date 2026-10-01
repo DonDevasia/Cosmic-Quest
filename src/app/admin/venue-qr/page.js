@@ -33,7 +33,7 @@ export default function VenueQrGenerator() {
           <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', breakInside: 'avoid', border: '2px dashed #ccc', padding: '20px', borderRadius: '10px' }}>
             <h2 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>Task {v.task}: {v.title}</h2>
             <p style={{ fontStyle: 'italic', color: '#555', textAlign: 'center', marginBottom: '15px' }}>"{v.hint}"</p>
-            <QRCodeSVG value={v.code} size={200} />
+            <QRCodeSVG value={`${v.code} - ${v.title}`} size={200} />
             <span style={{ marginTop: '15px', fontSize: '14px', fontWeight: 'bold' }}>Scan to Start Mission</span>
           </div>
         ))}

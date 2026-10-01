@@ -23,7 +23,7 @@ export async function POST(request) {
 
     const dbKeyword = task.start_keyword ? task.start_keyword.trim().toUpperCase() : '';
 
-    if (dbKeyword && cleanKeyword !== dbKeyword) {
+    if (dbKeyword && !cleanKeyword.startsWith(dbKeyword)) {
       return NextResponse.json({ success: false, message: 'Invalid Venue QR Code' }, { status: 400 });
     }
 
