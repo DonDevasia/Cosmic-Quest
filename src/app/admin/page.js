@@ -346,6 +346,34 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleForceStartTask = async () => {
+    if (!selectedTeamForScore) {
+      alert('Please select a team first');
+      return;
+    }
+    if (!confirm("Are you sure you want to FORCE START this team's currently assigned task? This bypasses the Venue QR scan and starts their puzzle timer immediately.")) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/force-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamId: selectedTeamForScore })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        alert('Task Successfully Force Started!');
+      } else {
+        alert('Failed: ' + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error force starting task');
+    }
+  };
+
   const handleTestTask = async (taskId) => {
     try {
       const res = await fetch('/api/admin/test-task', {
@@ -611,13 +639,22 @@ export default function AdminDashboard() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '15px' }}>
                       If a team is stuck or their timer broke, use this to force complete their <strong>currently active task</strong>, award them the points, and auto-assign their next task.
                     </p>
-                    <button 
-                      onClick={handleForceCompleteTask} 
-                      className="cyber-button" 
-                      style={{ borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)', width: '100%', padding: '15px' }}
-                    >
-                      FORCE COMPLETE ACTIVE TASK
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button 
+                        onClick={handleForceStartTask} 
+                        className="cyber-button" 
+                        style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)', width: '50%', padding: '15px' }}
+                      >
+                        FORCE START (MARK READY)
+                      </button>
+                      <button 
+                        onClick={handleForceCompleteTask} 
+                        className="cyber-button" 
+                        style={{ borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)', width: '50%', padding: '15px' }}
+                      >
+                        FORCE COMPLETE TASK
+                      </button>
+                    </div>
                   </div>
 
                 </div>
