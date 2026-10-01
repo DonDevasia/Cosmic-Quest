@@ -38,7 +38,10 @@ export default function AdminDashboard() {
       if (!error && data) {
         const mapped = data.map((t, idx) => {
           const activeTask = t.team_tasks?.find(tt => tt.is_active);
-          const completedCount = t.team_tasks?.filter(tt => tt.status === 'Completed').length || 0;
+          const completedTasksRaw = t.team_tasks?.filter(tt => tt.status === 'Completed') || [];
+          const completedCount = completedTasksRaw.length;
+          const completedNames = completedTasksRaw.map(tt => tt.tasks?.title).filter(Boolean).join(', ');
+          
           return {
             id: t.id,
             rank: idx + 1,
@@ -51,7 +54,8 @@ export default function AdminDashboard() {
             memberC: t.member_c,
             memberD: t.member_d,
             currentDirective: activeTask?.tasks?.title || 'None',
-            completedTasks: completedCount
+            completedTasks: completedCount,
+            completedTasksList: completedNames
           };
         });
         setTeams(mapped);
@@ -498,7 +502,15 @@ export default function AdminDashboard() {
                             <td style={{ padding: '10px', color: 'var(--accent-purple)', fontFamily: 'var(--font-mono)' }}>{team.code}</td>
                             <td style={{ padding: '10px', color: 'var(--accent-green)' }}><span className="meteor-icon">☄️</span>{team.score}</td>
                             <td style={{ padding: '10px', color: 'var(--accent-cyan)' }}>{team.currentDirective}</td>
-                            <td style={{ padding: '10px', fontWeight: 'bold' }}>{team.completedTasks} / 14</td>
+                            <td style={{ padding: '10px' }}>
+                              <div style={{ fontWeight: 'bold' }}>{team.completedTasks} / 14</div>
+                              <div 
+                                style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} 
+                                title={team.completedTasksList}
+                              >
+                                {team.completedTasksList || 'None yet'}
+                              </div>
+                            </td>
                             <td style={{ padding: '10px', color: team.status === 'Active' ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{team.status}</td>
                             <td style={{ padding: '10px' }}>
                               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
