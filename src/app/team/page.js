@@ -24,6 +24,7 @@ function TeamDashboardContent() {
   const [submitError, setSubmitError] = useState('');
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
+  const [isGameFinished, setIsGameFinished] = useState(false);
 
   const fetchTeamData = useCallback(async () => {
     if (!teamCode) return;
@@ -62,12 +63,14 @@ function TeamDashboardContent() {
     // 2.5 Get Completed Tasks Count
     const { data: pastTasks } = await supabase
       .from('team_tasks')
-      .select('task_id')
+      .select('task_id, status, tasks!inner(task_number)')
       .eq('team_id', teamData.id)
       .eq('is_active', false);
       
     if (pastTasks) {
       setCompletedTasksCount(Math.min(pastTasks.length, 10));
+      const finished = pastTasks.some(t => t.tasks?.task_number === 14 && t.status === 'Completed');
+      setIsGameFinished(finished);
     }
 
     // 3. Check for Active Task if Game is Started
@@ -482,6 +485,14 @@ function TeamDashboardContent() {
                   </>
                 )}
               </>
+            ) : isGameFinished ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <h2 className="neon-text-green animate-pulse" style={{ fontSize: '3rem', marginBottom: '20px', color: 'var(--accent-green)', textShadow: '0 0 20px var(--accent-green)' }}>MISSION ACCOMPLISHED</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '20px' }}>You have reached the final destination and successfully completed all phases of Cosmic Quest!</p>
+                <div style={{ display: 'inline-block', padding: '15px 30px', background: 'rgba(0, 255, 170, 0.1)', border: '2px solid var(--accent-green)', borderRadius: '8px', color: 'var(--accent-green)', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                  FINAL SCORE: {team.total_score}
+                </div>
+              </div>
             ) : (
               <h2 className="neon-text-blue animate-pulse" style={{ fontSize: '2rem', marginBottom: '20px' }}>DECRYPTING COORDINATES...</h2>
             )}
