@@ -4,18 +4,48 @@ import { useState, useRef } from 'react';
 export default function ObjectScannerTask({ description, onSuccess, teamId, taskId }) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
+  
+  const [image1, setImage1] = useState(null);
+  const [image2, setImage2] = useState(null);
+  
+  const fileInput1Ref = useRef(null);
+  const fileInput2Ref = useRef(null);
 
-  const handleCapture = async (e) => {
+  const handleCapture1 = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    try {
+      const compressed = await compressImage(file, 800, 0.6);
+      setImage1(compressed);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to process first image');
+    }
+  };
+
+  const handleCapture2 = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const compressed = await compressImage(file, 800, 0.6);
+      setImage2(compressed);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to process second image');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!image1 || !image2) {
+      setError('Please capture both images before submitting.');
+      return;
+    }
 
     setError('');
     setIsUploading(true);
 
     try {
-      // Compress the image before uploading to avoid large payload errors
-      const compressedBase64 = await compressImage(file, 800, 0.6); // Max 800px width, 60% quality
+      const stitchedBase64 = await stitchImages(image1, image2);
 
       const res = await fetch('/api/team/submit-verification', {
         method: 'POST',
@@ -23,7 +53,7 @@ export default function ObjectScannerTask({ description, onSuccess, teamId, task
         body: JSON.stringify({
           teamId,
           taskId,
-          payload: compressedBase64
+          payload: stitchedBase64
         })
       });
 
@@ -35,14 +65,40 @@ export default function ObjectScannerTask({ description, onSuccess, teamId, task
       }
     } catch (err) {
       console.error(err);
-      setError('System Error: Failed to process or upload image');
+      setError('System Error: Failed to submit images');
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
     }
   };
 
-  // HTML5 Canvas image compression
+  const stitchImages = (base64_1, base64_2) => {
+    return new Promise((resolve, reject) => {
+      const img1 = new Image();
+      const img2 = new Image();
+      img1.src = base64_1;
+      img1.onload = () => {
+        img2.src = base64_2;
+        img2.onload = () => {
+          const targetHeight = 800;
+          const width1 = (img1.width / img1.height) * targetHeight;
+          const width2 = (img2.width / img2.height) * targetHeight;
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = width1 + width2;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.drawImage(img1, 0, 0, width1, targetHeight);
+          ctx.drawImage(img2, width1, 0, width2, targetHeight);
+          
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img2.onerror = reject;
+      };
+      img1.onerror = reject;
+    });
+  };
+
   const compressImage = (file, maxWidth, quality) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -65,9 +121,7 @@ export default function ObjectScannerTask({ description, onSuccess, teamId, task
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           
-          // Return as base64 string
-          const dataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(dataUrl);
+          resolve(canvas.toDataURL('image/jpeg', quality));
         };
         img.onerror = (err) => reject(err);
       };
@@ -87,35 +141,64 @@ export default function ObjectScannerTask({ description, onSuccess, teamId, task
 
       {error && <p style={{ color: 'var(--accent-red)', marginBottom: '15px', fontWeight: 'bold' }}>{error}</p>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-        {/* Hidden file input for camera capture */}
-        <input 
-          type="file" 
-          accept="image/*" 
-          capture="environment" 
-          onChange={handleCapture}
-          ref={fileInputRef}
-          style={{ display: 'none' }} 
-          id="cameraInput"
-        />
-        
-        <label 
-          htmlFor="cameraInput"
-          className="cyber-button" 
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Item 1 */}
+        <div style={{ padding: '15px', border: '1px dashed var(--glass-border)', borderRadius: '8px' }}>
+          <h4 style={{ marginBottom: '10px', color: 'var(--accent-blue)' }}>TARGET 1: BLACK SHIRT GUY</h4>
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment" 
+            onChange={handleCapture1}
+            ref={fileInput1Ref}
+            style={{ display: 'none' }} 
+            id="cameraInput1"
+          />
+          <label 
+            htmlFor="cameraInput1"
+            className="cyber-button" 
+            style={{ display: 'inline-block', cursor: 'pointer', width: '100%', maxWidth: '300px' }}
+          >
+            {image1 ? 'RETAKE PHOTO 1' : 'SCAN TARGET 1'}
+          </label>
+          {image1 && <div style={{ marginTop: '10px', color: 'var(--accent-green)' }}>✓ Target 1 Scanned</div>}
+        </div>
+
+        {/* Item 2 */}
+        <div style={{ padding: '15px', border: '1px dashed var(--glass-border)', borderRadius: '8px' }}>
+          <h4 style={{ marginBottom: '10px', color: 'var(--accent-blue)' }}>TARGET 2: FIRE EXTINGUISHER</h4>
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment" 
+            onChange={handleCapture2}
+            ref={fileInput2Ref}
+            style={{ display: 'none' }} 
+            id="cameraInput2"
+          />
+          <label 
+            htmlFor="cameraInput2"
+            className="cyber-button" 
+            style={{ display: 'inline-block', cursor: 'pointer', width: '100%', maxWidth: '300px' }}
+          >
+            {image2 ? 'RETAKE PHOTO 2' : 'SCAN TARGET 2'}
+          </label>
+          {image2 && <div style={{ marginTop: '10px', color: 'var(--accent-green)' }}>✓ Target 2 Scanned</div>}
+        </div>
+
+        {/* Submit */}
+        <button 
+          onClick={handleSubmit}
+          disabled={!image1 || !image2 || isUploading}
+          className="cyber-button"
           style={{ 
-            display: 'inline-block',
-            cursor: isUploading ? 'not-allowed' : 'pointer',
-            opacity: isUploading ? 0.5 : 1,
-            width: '100%',
-            maxWidth: '300px'
+            marginTop: '10px',
+            opacity: (!image1 || !image2 || isUploading) ? 0.5 : 1,
+            cursor: (!image1 || !image2 || isUploading) ? 'not-allowed' : 'pointer'
           }}
         >
-          {isUploading ? 'UPLOADING SCAN...' : 'ACTIVATE SCANNER (TAKE PHOTO)'}
-        </label>
-        
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          Please ensure the object is clearly visible and well-lit before capturing.
-        </p>
+          {isUploading ? 'TRANSMITTING...' : 'SUBMIT COMBINED SCANS'}
+        </button>
       </div>
     </div>
   );

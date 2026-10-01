@@ -18,13 +18,13 @@ const supabase = createClient(
 async function main() {
   const { data, error } = await supabase
     .from('tasks')
-    .update({ venue_hint: 'Call The fireforce to the CS Block' })
-    .eq('task_number', 3);
+    .update({ description: 'Scan 1. Black Shirt Guy, 2. Fire Extinguisher' })
+    .eq('task_number', 4);
 
   if (error) {
     console.error('Error:', error);
   } else {
-    console.log('Successfully updated Thugwar venue hint in DB');
+    console.log('Successfully updated Object Scanner description in DB');
   }
 }
 
