@@ -1,9 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 
-// The 7 Tangram pieces. We define them as polygons (relative to their own 0,0 center).
-// Tangram is traditionally a 4x4 grid size. Let's scale it so a 1x1 triangle has legs of size 50px.
-// Base scale: 1 unit = 50px
 const SCALE = 50;
 
 const INITIAL_PIECES = [
@@ -16,6 +13,20 @@ const INITIAL_PIECES = [
   // Left Triangle
   { id: 4, type: 'tri-4', points: '0,0 -100,100 -100,-100', color: 'rgba(255, 150, 255, 0.9)', x: 300, y: 500, rotation: 0 },
 ];
+
+function getDirection(type, rot) {
+  const r = ((rot % 360) + 360) % 360; 
+  if (r % 90 !== 0) return null; // Diagonal, invalid
+
+  let baseDir = 0; // 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT
+  if (type === 'tri-1') baseDir = 0;
+  if (type === 'tri-2') baseDir = 2;
+  if (type === 'tri-3') baseDir = 1;
+  if (type === 'tri-4') baseDir = 3;
+
+  const steps = r / 90;
+  return (baseDir + steps) % 4;
+}
 
 export default function TangramTask({ onSuccess }) {
   const [pieces, setPieces] = useState(INITIAL_PIECES);
@@ -43,88 +54,130 @@ export default function TangramTask({ onSuccess }) {
   };
 
   const handlePointerUp = (e) => {
+    let checkNeeded = false;
+    let newPiecesState = [];
+    
+    setPieces(prev => {
+      newPiecesState = prev.map(p => {
+        if (p.id === draggingId) {
+          // Snap to center if close
+          if (Math.abs(p.x - 300) < 50 && Math.abs(p.y - 200) < 50) {
+            return { ...p, x: 300, y: 200 };
+          }
+        }
+        return p;
+      });
+      return newPiecesState;
+    });
+
     setDraggingId(null);
-    checkWinCondition();
+    setTimeout(() => checkWinCondition(newPiecesState), 50);
   };
 
   const handleDoubleClick = (id) => {
-    setPieces(prev => prev.map(p => 
-      p.id === id ? { ...p, rotation: (p.rotation + 45) % 360 } : p
-    ));
-    setTimeout(checkWinCondition, 100);
+    let newPiecesState = [];
+    setPieces(prev => {
+      newPiecesState = prev.map(p => 
+        p.id === id ? { ...p, rotation: (p.rotation + 45) % 360 } : p
+      );
+      return newPiecesState;
+    });
+    setTimeout(() => checkWinCondition(newPiecesState), 50);
   };
 
-  const checkWinCondition = () => {
-    // A proper tangram validation requires checking if the union of all polygons matches the target shape polygon.
-    // This is mathematically complex for a simple web component.
-    // For this puzzle, we will use a "Bounding Box + Area" heuristic, or a simple Admin Override keyword input!
-    // Since building a perfect intersection engine in 1 file is hard, we will allow them to play with it,
-    // and provide a "Submit Structure" button that does a basic proximity check, or just let them input the keyword.
+  const checkWinCondition = (currentPieces) => {
+    if (isSolved) return;
+    const directions = new Set();
+    let allCentered = true;
+
+    for (let p of currentPieces) {
+      if (Math.abs(p.x - 300) > 10 || Math.abs(p.y - 200) > 10) {
+        allCentered = false;
+        break;
+      }
+      const dir = getDirection(p.type, p.rotation);
+      if (dir === null) {
+        allCentered = false;
+        break;
+      }
+      directions.add(dir);
+    }
+
+    if (allCentered && directions.size === 4) {
+      setIsSolved(true);
+      setTimeout(() => {
+        onSuccess('SMART'); // Send completion keyword to API
+      }, 1000);
+    }
   };
 
   return (
     <div style={{ marginTop: '20px', padding: '20px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--accent-cyan)', borderRadius: '8px', textAlign: 'center' }}>
       <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>TANGRAM ALIGNMENT PROTOCOL</h3>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-        Drag the 4 pieces to form a perfect Square inside the target box. Double-tap a piece to rotate it.
-      </p>
-
-      <div style={{ 
-        position: 'relative', 
-        width: '100%', 
-        maxWidth: '600px', 
-        aspectRatio: '1 / 1', 
-        margin: '0 auto', 
-        background: 'rgba(255,255,255,0.05)',
-        border: '2px solid rgba(255,255,255,0.3)',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        touchAction: 'none' // Prevent scrolling while dragging
-      }}>
-        {/* Target Outline (Square) */}
-        <div style={{
-          position: 'absolute',
-          top: '100px',
-          left: '200px',
-          width: '200px',
-          height: '200px',
-          border: '2px dashed rgba(255,255,255,0.4)',
-          pointerEvents: 'none'
-        }}>
-          <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', letterSpacing: '2px' }}>TARGET</span>
+      
+      {isSolved ? (
+        <div style={{ padding: '20px', background: 'rgba(0, 255, 0, 0.2)', border: '1px solid var(--accent-green)', borderRadius: '8px' }}>
+          <h3 style={{ color: 'var(--accent-green)', marginBottom: '10px' }}>ALIGNMENT SUCCESSFUL</h3>
+          <p style={{ color: 'white' }}>Transmitting confirmation to Starfleet...</p>
         </div>
+      ) : (
+        <>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+            Drag the 4 pieces to form a perfect Square inside the green target box. Double-tap a piece to rotate it.
+          </p>
 
-        <svg 
-          ref={svgRef}
-          viewBox="0 0 600 600"
-          width="100%" 
-          height="100%" 
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        >
-          {pieces.map(piece => (
-            <polygon
-              key={piece.id}
-              points={piece.points}
-              fill={piece.color}
-              stroke="white"
-              strokeWidth="2"
-              transform={`translate(${piece.x}, ${piece.y}) rotate(${piece.rotation})`}
-              onPointerDown={(e) => handlePointerDown(e, piece.id)}
-              onDoubleClick={() => handleDoubleClick(piece.id)}
-              style={{ cursor: draggingId === piece.id ? 'grabbing' : 'grab' }}
-            />
-          ))}
-        </svg>
-      </div>
+          <div style={{ 
+            position: 'relative', 
+            width: '100%', 
+            maxWidth: '600px', 
+            aspectRatio: '1 / 1', 
+            margin: '0 auto', 
+            background: 'rgba(255,255,255,0.05)',
+            border: '2px solid rgba(255,255,255,0.3)',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            touchAction: 'none' // Prevent scrolling while dragging
+          }}>
+            {/* Target Outline (Green Space) */}
+            <div style={{
+              position: 'absolute',
+              top: '100px',
+              left: '200px',
+              width: '200px',
+              height: '200px',
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              border: '2px dashed rgba(0, 255, 0, 0.8)',
+              pointerEvents: 'none'
+            }}>
+              <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'rgba(0,255,0,0.6)', fontWeight: 'bold', letterSpacing: '2px' }}>TARGET</span>
+            </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '10px' }}>Once you form the shape perfectly, show it to the Admin to receive your Completion Keyword.</p>
-        <button className="cyber-button" onClick={() => onSuccess('SMART')} style={{ width: '100%', maxWidth: '300px' }}>
-          I HAVE THE KEYWORD
-        </button>
-      </div>
+            <svg 
+              ref={svgRef}
+              viewBox="0 0 600 600"
+              width="100%" 
+              height="100%" 
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerUp}
+            >
+              {pieces.map(piece => (
+                <polygon
+                  key={piece.id}
+                  points={piece.points}
+                  fill={piece.color}
+                  stroke="white"
+                  strokeWidth="2"
+                  transform={`translate(${piece.x}, ${piece.y}) rotate(${piece.rotation})`}
+                  onPointerDown={(e) => handlePointerDown(e, piece.id)}
+                  onDoubleClick={() => handleDoubleClick(piece.id)}
+                  style={{ cursor: draggingId === piece.id ? 'grabbing' : 'grab', transition: draggingId === piece.id ? 'none' : 'transform 0.2s ease' }}
+                />
+              ))}
+            </svg>
+          </div>
+        </>
+      )}
     </div>
   );
 }
