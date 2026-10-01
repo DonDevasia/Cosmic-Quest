@@ -16,10 +16,10 @@ function shuffleArray(array) {
 
 export async function POST(request) {
   try {
-    const { teamId, taskId, keyword, isExpired } = await request.json();
+    const { teamId, taskId, keyword, isExpired, adminOverride } = await request.json();
     const cleanKeyword = keyword ? keyword.trim().toUpperCase() : '';
 
-    if (!teamId || !taskId || (!cleanKeyword && !isExpired)) {
+    if (!teamId || !taskId || (!cleanKeyword && !isExpired && !adminOverride)) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
@@ -34,7 +34,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: 'Task not found' }, { status: 404 });
     }
 
-    if (!isExpired) {
+    if (!isExpired && !adminOverride) {
       const dbKeyword = task.completion_keyword ? task.completion_keyword.trim().toUpperCase() : '';
 
       if (dbKeyword && cleanKeyword !== dbKeyword) {

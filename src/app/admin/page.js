@@ -283,6 +283,52 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleForceCompleteTask = async () => {
+    if (!selectedTeamForScore) {
+      alert('Please select a team first');
+      return;
+    }
+    if (!confirm('Are you sure you want to FORCE COMPLETE this team\\'s currently active task? This will award them base points and move them to the next task.')) {
+      return;
+    }
+
+    try {
+      // 1. Get the team's currently active task
+      const res1 = await fetch('/api/admin/force-complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamId: selectedTeamForScore })
+      });
+      const data1 = await res1.json();
+      
+      if (!data1.success) {
+        alert(data1.message);
+        return;
+      }
+
+      // 2. Submit the task with admin override
+      const res2 = await fetch('/api/team/submit-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          teamId: selectedTeamForScore, 
+          taskId: data1.taskId, 
+          adminOverride: true 
+        })
+      });
+      
+      const data2 = await res2.json();
+      if (data2.success) {
+        alert('Task Successfully Force Completed!');
+      } else {
+        alert('Failed: ' + data2.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error force completing task');
+    }
+  };
+
   const handleTestTask = async (taskId) => {
     try {
       const res = await fetch('/api/admin/test-task', {
@@ -531,6 +577,20 @@ export default function AdminDashboard() {
                         <button key={pts} onClick={() => handleQuickScore(-pts)} className="cyber-button" style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>-{pts}</button>
                       ))}
                     </div>
+                  </div>
+
+                  <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px dashed rgba(255,255,255,0.2)' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', color: 'var(--accent-purple)' }}>TASK OVERRIDE</label>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '15px' }}>
+                      If a team is stuck or their timer broke, use this to force complete their <strong>currently active task</strong>, award them the points, and auto-assign their next task.
+                    </p>
+                    <button 
+                      onClick={handleForceCompleteTask} 
+                      className="cyber-button" 
+                      style={{ borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)', width: '100%', padding: '15px' }}
+                    >
+                      FORCE COMPLETE ACTIVE TASK
+                    </button>
                   </div>
 
                 </div>
