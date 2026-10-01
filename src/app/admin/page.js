@@ -301,6 +301,10 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleOpenLogs = () => {
+    window.open('/admin/logs', '_blank');
+  };
+
   return (
     <div className="container">
       <Navbar title="Fleet Command Center" subtitle="Cosmic Mission Control" />
@@ -319,6 +323,13 @@ export default function AdminDashboard() {
             {tab.toUpperCase()}
           </button>
         ))}
+        <button 
+          onClick={handleOpenLogs}
+          className="cyber-button"
+          style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
+        >
+          VIEW LOGS
+        </button>
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
